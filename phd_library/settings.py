@@ -69,8 +69,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'phd_library.wsgi.application'
 
-# Database — SQLite for dev, PostgreSQL for production (set DB_* env vars)
-if config('USE_POSTGRES', default=False, cast=bool):
+# Database — SQLite in development, PostgreSQL in production
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -79,13 +86,6 @@ if config('USE_POSTGRES', default=False, cast=bool):
             'PASSWORD': config('DB_PASSWORD', default=''),
             'HOST': config('DB_HOST', default='localhost'),
             'PORT': config('DB_PORT', default='5432'),
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
