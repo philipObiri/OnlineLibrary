@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create a Free Account — ScholarVault | UGC Digital Library{% endblock %}
+{% block description %}Join the University of Gold Coast digital library. Create a free account to access 90+ PhD textbooks, save bookmarks, and download open-access publications.{% endblock %}
+
+{% block og_title %}Create a Free Account — ScholarVault | UGC Digital Library{% endblock %}
+{% block og_description %}Join the University of Gold Coast digital library. Access 90+ PhD textbooks, save bookmarks, and download open-access publications — completely free.{% endblock %}
+{% block twitter_card %}summary{% endblock %}
+{% block twitter_title %}Create a Free Account — ScholarVault | UGC{% endblock %}
+{% block twitter_description %}Join the University of Gold Coast digital library. Access 90+ PhD textbooks and open-access publications — completely free.{% endblock %}
+
+{% block content %}
+<div class="sv-auth-page">
+  <div class="sv-auth-bg">
+    <div class="sv-auth-orb sv-auth-orb--1"></div>
+    <div class="sv-auth-orb sv-auth-orb--2"></div>
+  </div>
+
+  <div class="container sv-auth-container">
+    <div class="row justify-content-center py-5">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+
+        <!-- Brand -->
+        <div class="sv-auth-brand">
+          <a href="{% url 'landing' %}">
+            <i class="bi bi-journal-bookmark-fill"></i>
+            <span>ScholarVault</span>
+          </a>
+        </div>
+
+        <div class="sv-auth-card">
+          <div class="sv-auth-card-header">
+            <h2 class="sv-auth-title">Join ScholarVault</h2>
+            <p class="sv-auth-subtitle">Create your account and access the world's scholarly research</p>
+          </div>
+
+          <form method="POST" class="sv-auth-form">
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="sv-form-group">
+                  <label class="sv-form-label">First Name</label>
+                  <div class="sv-form-input-wrap">
+                    <i class="bi bi-person-fill sv-form-icon"></i>
+                    <input type="text" name="first_name" class="sv-form-input" placeholder="First Name" required value="{{ form.first_name.value|default:'' }}" />
+                  </div>
+                  {% if form.first_name.errors %}<div class="sv-form-error">{{ form.first_name.errors.as_text }}</div>{% endif %}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="sv-form-group">
+                  <label class="sv-form-label">Last Name</label>
+                  <div class="sv-form-input-wrap">
+                    <i class="bi bi-person-fill sv-form-icon"></i>
+                    <input type="text" name="last_name" class="sv-form-input" placeholder="Last Name" required value="{{ form.last_name.value|default:'' }}" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sv-form-group">
+              <label class="sv-form-label">Email Address</label>
+              <div class="sv-form-input-wrap">
+                <i class="bi bi-envelope-fill sv-form-icon"></i>
+                <input type="email" name="email" class="sv-form-input" placeholder="your@university.edu" required value="{{ form.email.value|default:'' }}" />
+              </div>
+              {% if form.email.errors %}<div class="sv-form-error">{{ form.email.errors.as_text }}</div>{% endif %}
+            </div>
+
+            <div class="sv-form-group">
+              <label class="sv-form-label">Username</label>
+              <div class="sv-form-input-wrap">
+                <i class="bi bi-at sv-form-icon"></i>
+                <input type="text" name="username" class="sv-form-input" placeholder="Choose a username" required value="{{ form.username.value|default:'' }}" />
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="sv-form-group">
+                  <label class="sv-form-label">Institution</label>
+                  <div class="sv-form-input-wrap">
+                    <i class="bi bi-building sv-form-icon"></i>
+                    <input type="text" name="institution" class="sv-form-input" placeholder="Your university" value="{{ form.institution.value|default:'' }}" />
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="sv-form-group">
+                  <label class="sv-form-label">Role</label>
+                  <div class="sv-form-input-wrap">
+                    <i class="bi bi-mortarboard sv-form-icon"></i>
+                    <select name="role" class="sv-form-input sv-form-select">
+                      {% for val, label in form.fields.role.choices %}
+                      <option value="{{ val }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sv-form-group">
+              <label class="sv-form-label">Research Area</label>
+              <div class="sv-form-input-wrap">
+                <i class="bi bi-lightbulb sv-form-icon"></i>
+                <input type="text" name="research_area" class="sv-form-input" placeholder="e.g. Machine Learning, Biomedical Research" value="{{ form.research_area.value|default:'' }}" />
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="sv-form-group">
+                  <label class="sv-form-label">Password</label>
+                  <div class="sv-form-input-wrap">
+                    <i class="bi bi-lock-fill sv-form-icon"></i>
+                    <input type="password" name="password1" id="pwd1" class="sv-form-input" placeholder="Create password" required />
+                    <button type="button" class="sv-password-toggle" onclick="togglePwd('pwd1', this)"><i class="bi bi-eye-fill"></i></button>
+                  </div>
+                  {% if form.password1.errors %}<div class="sv-form-error">{{ form.password1.errors.as_text }}</div>{% endif %}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="sv-form-group">
+                  <label class="sv-form-label">Confirm Password</label>
+                  <div class="sv-form-input-wrap">
+                    <i class="bi bi-lock-fill sv-form-icon"></i>
+                    <input type="password" name="password2" id="pwd2" class="sv-form-input" placeholder="Confirm password" required />
+                    <button type="button" class="sv-password-toggle" onclick="togglePwd('pwd2', this)"><i class="bi bi-eye-fill"></i></button>
+                  </div>
+                  {% if form.password2.errors %}<div class="sv-form-error">{{ form.password2.errors.as_text }}</div>{% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="sv-form-terms">
+              <input type="checkbox" id="termsCheck" required />
+              <label for="termsCheck">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+            </div>
+
+            <button type="submit" class="sv-auth-submit">
+              <span>Create Account</span>
+              <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+            </button>
+          </form>
+
+          <div class="sv-auth-footer">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePwd(id, btn) {
+  const input = document.getElementById(id);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
+  } else {
+    input.type = 'password';
+    btn.innerHTML = '<i class="bi bi-eye-fill"></i>';
+  }
+}
+</script>
+{% endblock %}

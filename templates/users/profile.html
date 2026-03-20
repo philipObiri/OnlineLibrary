@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile — ScholarVault | UGC Digital Library{% endblock %}
+{% block description %}Manage your University of Gold Coast digital library account — update your institution, research area, department, and avatar.{% endblock %}
+
+{% block og_title %}My Profile — ScholarVault | UGC Digital Library{% endblock %}
+{% block og_description %}Manage your University of Gold Coast digital library account — update your institution, research area, department, and avatar.{% endblock %}
+{% block twitter_card %}summary{% endblock %}
+{% block twitter_title %}My Profile — ScholarVault | UGC{% endblock %}
+{% block twitter_description %}Manage your University of Gold Coast digital library account.{% endblock %}
+
+{% block content %}
+<div class="container-xl py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <div class="sv-page-header mb-4" style="padding: 2rem; border-radius: 16px;">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb sv-breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+          </ol>
+        </nav>
+        <h1 class="sv-page-title">Edit Profile</h1>
+      </div>
+
+      <div class="sv-auth-card">
+        <form method="POST" enctype="multipart/form-data" class="sv-auth-form">
+          {% csrf_token %}
+
+          <div class="text-center mb-4">
+            <img src="{{ user.avatar_url }}" alt="{{ user.full_name }}" class="sv-dashboard-avatar" style="width:80px;height:80px;" />
+            <div class="mt-2">
+              <label class="sv-form-label">Profile Photo</label>
+              <input type="file" name="avatar" class="form-control" accept="image/*" />
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="sv-form-group">
+                <label class="sv-form-label">First Name</label>
+                <div class="sv-form-input-wrap">
+                  <i class="bi bi-person-fill sv-form-icon"></i>
+                  <input type="text" name="first_name" class="sv-form-input" value="{{ user.first_name }}" />
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="sv-form-group">
+                <label class="sv-form-label">Last Name</label>
+                <div class="sv-form-input-wrap">
+                  <i class="bi bi-person-fill sv-form-icon"></i>
+                  <input type="text" name="last_name" class="sv-form-input" value="{{ user.last_name }}" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="sv-form-group">
+                <label class="sv-form-label">Institution</label>
+                <div class="sv-form-input-wrap">
+                  <i class="bi bi-building sv-form-icon"></i>
+                  <input type="text" name="institution" class="sv-form-input" value="{{ user.institution }}" placeholder="Your university" />
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="sv-form-group">
+                <label class="sv-form-label">Department</label>
+                <div class="sv-form-input-wrap">
+                  <i class="bi bi-diagram-3 sv-form-icon"></i>
+                  <input type="text" name="department" class="sv-form-input" value="{{ user.department }}" placeholder="Your department" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-form-group">
+            <label class="sv-form-label">Research Area</label>
+            <div class="sv-form-input-wrap">
+              <i class="bi bi-lightbulb sv-form-icon"></i>
+              <input type="text" name="research_area" class="sv-form-input" value="{{ user.research_area }}" placeholder="e.g. Machine Learning" />
+            </div>
+          </div>
+
+          <div class="sv-form-group">
+            <label class="sv-form-label">Bio</label>
+            <textarea name="bio" class="sv-form-input" rows="4" placeholder="Tell us about your research…">{{ user.bio }}</textarea>
+          </div>
+
+          <button type="submit" class="sv-auth-submit">
+            <span>Save Changes</span>
+            <i class="bi bi-check-circle-fill ms-2"></i>
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

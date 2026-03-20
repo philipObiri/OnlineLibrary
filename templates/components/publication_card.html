@@ -1,0 +1,51 @@
+<!-- Publication Card Component -->
+<div class="sv-pub-card" data-pub-id="{{ pub.id }}" data-slug="{{ pub.slug }}">
+  <div class="sv-pub-card-cover">
+    <a href="{{ pub.get_absolute_url }}">
+      <img src="{{ pub.cover_url }}" alt="{{ pub.title }}" loading="lazy" />
+    </a>
+    <div class="sv-pub-type">{{ pub.get_publication_type_display }}</div>
+    {% if pub.is_open_access %}
+    <div class="sv-oa-badge" title="Open Access"><i class="bi bi-unlock-fill"></i></div>
+    {% endif %}
+    <!-- Quick actions on hover -->
+    <div class="sv-pub-hover-actions">
+      <a href="{{ pub.get_absolute_url }}" class="sv-pub-action-btn" title="View Details">
+        <i class="bi bi-eye-fill"></i>
+      </a>
+      {% if user.is_authenticated %}
+      <button class="sv-pub-action-btn sv-bookmark-btn {% if pub.slug in bookmarked_slugs %}active{% endif %}"
+              data-slug="{{ pub.slug }}" title="Bookmark">
+        <i class="bi bi-bookmark{% if pub.slug in bookmarked_slugs %}-fill{% endif %}"></i>
+      </button>
+      {% endif %}
+      {% if pub.is_open_access and user.is_authenticated %}
+      <a href="{% url 'download_publication' pub.slug %}" class="sv-pub-action-btn" title="Download">
+        <i class="bi bi-download"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="sv-pub-card-body">
+    {% if pub.category %}
+    <a href="{% url 'catalogue' %}?category={{ pub.category.slug }}" class="sv-pub-category">
+      {{ pub.category.name }}
+    </a>
+    {% endif %}
+    <h5 class="sv-pub-title">
+      <a href="{{ pub.get_absolute_url }}">{{ pub.title|truncatechars:65 }}</a>
+    </h5>
+    <div class="sv-pub-author">
+      <i class="bi bi-person me-1"></i>{{ pub.author }}
+    </div>
+    <div class="sv-pub-footer">
+      <span class="sv-pub-year">
+        <i class="bi bi-calendar3 me-1"></i>{{ pub.publication_year }}
+      </span>
+      <span class="sv-pub-views">
+        <i class="bi bi-eye me-1"></i>{{ pub.view_count }}
+      </span>
+    </div>
+  </div>
+</div>

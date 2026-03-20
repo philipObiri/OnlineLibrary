@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Delete User — ScholarVault{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:500px;">
+  <div class="sv-auth-card text-center">
+    <div style="font-size:3rem;color:#dc3545;margin-bottom:1rem;"><i class="bi bi-person-x-fill"></i></div>
+    <h3>Delete User?</h3>
+    <div class="mb-3">
+      <img src="{{ object.avatar_url }}" alt="{{ object.full_name }}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;" />
+    </div>
+    <p class="text-muted">
+      You are about to permanently delete:<br>
+      <strong>{{ object.full_name }}</strong><br>
+      <small>{{ object.email }}</small>
+    </p>
+    <div class="alert alert-warning text-start">
+      <i class="bi bi-exclamation-triangle-fill me-1"></i>
+      All their bookmarks and download history will also be deleted.
+    </div>
+    <form method="POST" class="d-flex gap-3 justify-content-center mt-4">
+      {% csrf_token %}
+      <button type="submit" class="sv-auth-submit" style="background:#dc3545;">Yes, Delete</button>
+      <a href="{% url 'user_list' %}" class="sv-btn-ghost px-4">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static library_extras %}
+
+{% block title %}{{ publication.title }} by {{ publication.author }} — ScholarVault | UGC Library{% endblock %}
+{% block description %}{{ publication.abstract|truncatechars:155 }}{% endblock %}
+
+{% block og_type %}book{% endblock %}
+{% block og_title %}{{ publication.title }} — {{ publication.author }}{% endblock %}
+{% block og_description %}{{ publication.abstract|truncatechars:200 }}{% endblock %}
+{% block og_image %}{% if publication.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ publication.cover_image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+
+{% block twitter_card %}summary_large_image{% endblock %}
+{% block twitter_title %}{{ publication.title }} — {{ publication.author }} | ScholarVault{% endblock %}
+{% block twitter_description %}{{ publication.abstract|truncatechars:200 }}{% endblock %}
+{% block twitter_image %}{% if publication.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ publication.cover_image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+
+{% block content %}
+
+<div class="sv-detail-page">
+  <div class="container-xl py-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb sv-breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'landing' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'catalogue' %}">Library</a></li>
+        {% if publication.category %}
+        <li class="breadcrumb-item"><a href="{% url 'catalogue' %}?category={{ publication.category.slug }}">{{ publication.category.name }}</a></li>
+        {% endif %}
+        <li class="breadcrumb-item active">{{ publication.title|truncatechars:40 }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-5">
+
+      <!-- ═══ LEFT: Cover + Actions ═══ -->
+      <div class="col-lg-4 col-xl-3">
+        <div class="sv-detail-sidebar">
+
+          <!-- Cover -->
+          <div class="sv-detail-cover">
+            <img src="{{ publication.cover_url }}" alt="{{ publication.title }}" class="sv-detail-cover-img" />
+            {% if publication.is_open_access %}
+            <div class="sv-detail-oa-badge">
+              <i class="bi bi-unlock-fill me-1"></i>Open Access
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="sv-detail-actions">
+            {% if user.is_authenticated %}
+              {% if publication.is_open_access %}
+              <a href="{% url 'download_publication' publication.slug %}" class="sv-btn-primary w-100 sv-btn-download">
+                <i class="bi bi-download me-2"></i>Download PDF
+              </a>
+              {% else %}
+              <button class="sv-btn-primary w-100" disabled>
+                <i class="bi bi-lock-fill me-2"></i>Restricted Access
+              </button>
+              {% endif %}
+
+              <button class="sv-btn-outline w-100 sv-bookmark-toggle {% if is_bookmarked %}sv-bookmarked{% endif %}"
+                      id="bookmarkBtn" data-slug="{{ publication.slug }}">
+                <i class="bi bi-bookmark{% if is_bookmarked %}-fill{% endif %} me-2" id="bookmarkIcon"></i>
+                <span id="bookmarkText">{% if is_bookmarked %}Saved{% else %}Save to Library{% endif %}</span>
+              </button>
+            {% else %}
+              <a href="{% url 'login' %}?next={{ request.path }}" class="sv-btn-primary w-100">
+                <i class="bi bi-person-fill me-2"></i>Login to Download
+              </a>
+              <a href="{% url 'register' %}" class="sv-btn-outline w-100">Create Free Account</a>
+            {% endif %}
+
+            {% if publication.external_url %}
+            <a href="{{ publication.external_url }}" target="_blank" rel="noopener" class="sv-btn-ghost w-100">
+              <i class="bi bi-box-arrow-up-right me-2"></i>View Online
+            </a>
+            {% endif %}
+          </div>
+
+          <!-- Quick Meta -->
+          <div class="sv-detail-quick-meta">
+            <div class="sv-quick-meta-item">
+              <span class="sv-qm-label">Type</span>
+              <span class="sv-qm-value">{{ publication.get_publication_type_display }}</span>
+            </div>
+            <div class="sv-quick-meta-item">
+              <span class="sv-qm-label">Year</span>
+              <span class="sv-qm-value">{{ publication.publication_year }}</span>
+            </div>
+            {% if publication.language %}
+            <div class="sv-quick-meta-item">
+              <span class="sv-qm-label">Language</span>
+              <span class="sv-qm-value">{{ publication.language }}</span>
+            </div>
+            {% endif %}
+            <div class="sv-quick-meta-item">
+              <span class="sv-qm-label">Views</span>
+              <span class="sv-qm-value">{{ publication.view_count|default:0 }}</span>
+            </div>
+            <div class="sv-quick-meta-item">
+              <span class="sv-qm-label">Downloads</span>
+              <span class="sv-qm-value">{{ publication.download_count|default:0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ RIGHT: Details ═══ -->
+      <div class="col-lg-8 col-xl-9">
+
+        <!-- Header -->
+        <div class="sv-detail-header">
+          {% if publication.category %}
+          <a href="{% url 'catalogue' %}?category={{ publication.category.slug }}" class="sv-detail-category">
+            {{ publication.category.name }}
+          </a>
+          {% endif %}
+
+          <h1 class="sv-detail-title">{{ publication.title }}</h1>
+
+          <div class="sv-detail-authors">
+            <i class="bi bi-person-fill me-2"></i>
+            <span class="sv-detail-author-primary">{{ publication.author }}</span>
+            {% if publication.co_authors %}
+            <span class="sv-detail-coauthors">, {{ publication.co_authors }}</span>
+            {% endif %}
+          </div>
+
+          {% if publication.institution %}
+          <div class="sv-detail-institution">
+            <i class="bi bi-building me-2"></i>{{ publication.institution }}
+          </div>
+          {% endif %}
+
+          <!-- Meta pills -->
+          <div class="sv-detail-meta-pills">
+            <span class="sv-meta-pill sv-meta-pill--blue">
+              <i class="bi bi-calendar3 me-1"></i>{{ publication.publication_year }}
+            </span>
+            {% if publication.journal_name %}
+            <span class="sv-meta-pill">
+              <i class="bi bi-journal me-1"></i>{{ publication.journal_name }}
+            </span>
+            {% endif %}
+            {% if publication.doi %}
+            <a href="https://doi.org/{{ publication.doi }}" target="_blank" class="sv-meta-pill sv-meta-pill--link">
+              <i class="bi bi-link-45deg me-1"></i>DOI: {{ publication.doi }}
+            </a>
+            {% endif %}
+            {% if publication.isbn %}
+            <span class="sv-meta-pill">ISBN: {{ publication.isbn }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="sv-detail-tabs" id="detailTabs">
+          <button class="sv-tab active" data-tab="abstract">Abstract</button>
+          <button class="sv-tab" data-tab="details">Details</button>
+          <button class="sv-tab" data-tab="citation">Cite This</button>
+          {% if tags %}<button class="sv-tab" data-tab="tags">Keywords & Tags</button>{% endif %}
+          {% if user.is_authenticated and publication.file %}
+          <button class="sv-tab" data-tab="preview"><i class="bi bi-eye me-1"></i>Preview</button>
+          {% endif %}
+        </div>
+
+        <!-- Tab Panels -->
+        <div class="sv-tab-panels">
+
+          <!-- Abstract -->
+          <div class="sv-tab-panel active" data-panel="abstract">
+            <div class="sv-detail-abstract">
+              <h3 class="sv-panel-heading">Abstract</h3>
+              <div class="sv-abstract-text">{{ publication.abstract|linebreaksbr }}</div>
+            </div>
+            {% if publication.keywords %}
+            <div class="sv-detail-keywords mt-4">
+              <h5 class="sv-panel-subheading">Keywords</h5>
+              <div class="sv-keywords-list">
+                {% for kw in publication.keywords|split:"," %}
+                <a href="{% url 'catalogue' %}?q={{ kw }}" class="sv-keyword-tag">{{ kw }}</a>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Details -->
+          <div class="sv-tab-panel" data-panel="details">
+            <div class="sv-detail-info-grid">
+              <div class="sv-info-item">
+                <span class="sv-info-label">Full Title</span>
+                <span class="sv-info-value">{{ publication.title }}</span>
+              </div>
+              <div class="sv-info-item">
+                <span class="sv-info-label">Primary Author</span>
+                <span class="sv-info-value">{{ publication.author }}</span>
+              </div>
+              {% if publication.co_authors %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Co-Authors</span>
+                <span class="sv-info-value">{{ publication.co_authors }}</span>
+              </div>
+              {% endif %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Publication Type</span>
+                <span class="sv-info-value">{{ publication.get_publication_type_display }}</span>
+              </div>
+              <div class="sv-info-item">
+                <span class="sv-info-label">Year</span>
+                <span class="sv-info-value">{{ publication.publication_year }}</span>
+              </div>
+              {% if publication.publisher %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Publisher</span>
+                <span class="sv-info-value">{{ publication.publisher }}</span>
+              </div>
+              {% endif %}
+              {% if publication.journal_name %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Journal</span>
+                <span class="sv-info-value">{{ publication.journal_name }}</span>
+              </div>
+              {% endif %}
+              {% if publication.volume %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Volume / Issue</span>
+                <span class="sv-info-value">Vol. {{ publication.volume }}, No. {{ publication.issue }}</span>
+              </div>
+              {% endif %}
+              {% if publication.pages %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Pages</span>
+                <span class="sv-info-value">{{ publication.pages }}</span>
+              </div>
+              {% endif %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Category</span>
+                <span class="sv-info-value">{{ publication.category.name|default:"—" }}</span>
+              </div>
+              {% if publication.institution %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Institution</span>
+                <span class="sv-info-value">{{ publication.institution }}</span>
+              </div>
+              {% endif %}
+              <div class="sv-info-item">
+                <span class="sv-info-label">Access</span>
+                <span class="sv-info-value">
+                  {% if publication.is_open_access %}
+                  <span class="sv-oa-pill"><i class="bi bi-unlock-fill me-1"></i>Open Access</span>
+                  {% else %}
+                  <span class="sv-restricted-pill"><i class="bi bi-lock-fill me-1"></i>Restricted</span>
+                  {% endif %}
+                </span>
+              </div>
+              <div class="sv-info-item">
+                <span class="sv-info-label">Added to Library</span>
+                <span class="sv-info-value">{{ publication.created_at|date:"F j, Y" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Citation -->
+          <div class="sv-tab-panel" data-panel="citation">
+            <h3 class="sv-panel-heading">Cite This Publication</h3>
+
+            <!-- APA -->
+            <div class="sv-citation-block">
+              <div class="sv-citation-header">
+                <span class="sv-citation-style">APA</span>
+                <button class="sv-copy-btn" data-target="citationAPA">
+                  <i class="bi bi-clipboard me-1"></i>Copy
+                </button>
+              </div>
+              <div class="sv-citation-text" id="citationAPA">{{ publication.citation_apa }}</div>
+            </div>
+
+            <!-- MLA -->
+            <div class="sv-citation-block">
+              <div class="sv-citation-header">
+                <span class="sv-citation-style">MLA</span>
+                <button class="sv-copy-btn" data-target="citationMLA">
+                  <i class="bi bi-clipboard me-1"></i>Copy
+                </button>
+              </div>
+              <div class="sv-citation-text" id="citationMLA">{{ publication.citation_mla }}</div>
+            </div>
+
+            {% if publication.doi %}
+            <div class="sv-citation-block">
+              <div class="sv-citation-header">
+                <span class="sv-citation-style">DOI</span>
+                <button class="sv-copy-btn" data-target="citationDOI">
+                  <i class="bi bi-clipboard me-1"></i>Copy
+                </button>
+              </div>
+              <div class="sv-citation-text" id="citationDOI">https://doi.org/{{ publication.doi }}</div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Tags -->
+          {% if tags %}
+          <div class="sv-tab-panel" data-panel="tags">
+            <h3 class="sv-panel-heading">Keywords & Tags</h3>
+            <div class="sv-tags-cloud">
+              {% for tag in tags %}
+              <a href="{% url 'catalogue' %}?q={{ tag.name }}" class="sv-cloud-tag">{{ tag.name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- PDF Preview (authenticated users with a file) -->
+          {% if user.is_authenticated and publication.file %}
+          <div class="sv-tab-panel" data-panel="preview">
+            <div class="sv-pdf-viewer" id="svPdfViewer">
+
+              <!-- Toolbar -->
+              <div class="sv-pdf-toolbar">
+                <div class="sv-pdf-toolbar-left">
+                  <button class="sv-pdf-nav-btn" id="pdfPrevPage" title="Previous page">
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                  <span class="sv-pdf-page-info">
+                    Page <span id="pdfCurrentPage">1</span> of <span id="pdfTotalPages">—</span>
+                  </span>
+                  <button class="sv-pdf-nav-btn" id="pdfNextPage" title="Next page">
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+                <div class="sv-pdf-toolbar-right">
+                  <button class="sv-pdf-nav-btn" id="pdfZoomOut" title="Zoom out"><i class="bi bi-zoom-out"></i></button>
+                  <span class="sv-pdf-zoom-label" id="pdfZoomLabel">100%</span>
+                  <button class="sv-pdf-nav-btn" id="pdfZoomIn" title="Zoom in"><i class="bi bi-zoom-in"></i></button>
+                  <button class="sv-pdf-nav-btn" id="pdfFullscreen" title="Fullscreen"><i class="bi bi-fullscreen"></i></button>
+                  {% if publication.is_open_access %}
+                  <a href="{% url 'download_publication' publication.slug %}" class="sv-pdf-nav-btn sv-pdf-download-btn" title="Download PDF">
+                    <i class="bi bi-download"></i>
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Canvas container -->
+              <div class="sv-pdf-canvas-wrap" id="pdfCanvasWrap">
+                <div class="sv-pdf-loading" id="pdfLoading">
+                  <div class="sv-pdf-spinner"></div>
+                  <p>Loading preview…</p>
+                </div>
+                <canvas id="pdfCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+
+      </div><!-- /col -->
+    </div><!-- /row -->
+
+    <!-- ═══ RELATED PUBLICATIONS ═══ -->
+    {% if related %}
+    <div class="sv-detail-related">
+      <div class="sv-section-header-row mb-4">
+        <h3 class="sv-section-title" style="font-size:1.5rem;">Related Publications</h3>
+        <a href="{% url 'catalogue' %}?category={{ publication.category.slug }}" class="sv-btn-ghost">
+          View More <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="row g-4">
+        {% for rel in related %}
+        <div class="col-sm-6 col-lg-3">
+          {% include 'components/publication_card.html' with pub=rel %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /container -->
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const DETAIL_CONFIG = {
+  slug: '{{ publication.slug }}',
+  bookmarkUrl: '{% url "toggle_bookmark" publication.slug %}',
+  isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }},
+  isBookmarked: {{ is_bookmarked|yesno:"true,false" }},
+  csrfToken: '{{ csrf_token }}',
+  {% if user.is_authenticated and publication.file %}
+  pdfUrl: '{{ publication.file.url }}',
+  hasPdf: true,
+  {% else %}
+  hasPdf: false,
+  {% endif %}
+};
+</script>
+<script src="{% static 'js/detail.js' %}"></script>
+{% endblock %}

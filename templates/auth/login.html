@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In — ScholarVault | UGC Digital Library{% endblock %}
+{% block description %}Sign in to access the University of Gold Coast PhD digital library. Download textbooks, save bookmarks, and track your reading history.{% endblock %}
+
+{% block og_title %}Sign In — ScholarVault | UGC Digital Library{% endblock %}
+{% block og_description %}Sign in to access the University of Gold Coast PhD digital library. Download textbooks, save bookmarks, and track your reading history.{% endblock %}
+{% block twitter_card %}summary{% endblock %}
+{% block twitter_title %}Sign In — ScholarVault | UGC Digital Library{% endblock %}
+{% block twitter_description %}Sign in to access the University of Gold Coast PhD digital library. Download textbooks, save bookmarks, and track your reading history.{% endblock %}
+
+{% block content %}
+<div class="sv-auth-page">
+  <div class="sv-auth-bg">
+    <div class="sv-auth-orb sv-auth-orb--1"></div>
+    <div class="sv-auth-orb sv-auth-orb--2"></div>
+  </div>
+
+  <div class="container sv-auth-container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+      <div class="col-md-9 col-lg-7 col-xl-6">
+
+        <!-- Brand -->
+        <div class="sv-auth-brand">
+          <a href="{% url 'landing' %}">
+            <i class="bi bi-journal-bookmark-fill"></i>
+            <span>ScholarVault</span>
+          </a>
+        </div>
+
+        <div class="sv-auth-card">
+          <div class="sv-auth-card-header">
+            <h2 class="sv-auth-title">Welcome Back</h2>
+            <p class="sv-auth-subtitle">Sign in to access your research library</p>
+          </div>
+
+          <form method="POST" class="sv-auth-form">
+            {% csrf_token %}
+
+            <div class="sv-form-group">
+              <label class="sv-form-label">Email Address</label>
+              <div class="sv-form-input-wrap">
+                <i class="bi bi-envelope-fill sv-form-icon"></i>
+                <input
+                  type="email"
+                  name="username"
+                  class="sv-form-input"
+                  placeholder="your@university.edu"
+                  required
+                  autofocus
+                  value="{{ form.username.value|default:'' }}"
+                />
+              </div>
+              {% if form.username.errors %}
+              <div class="sv-form-error">{{ form.username.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <div class="sv-form-group">
+              <label class="sv-form-label">Password</label>
+              <div class="sv-form-input-wrap">
+                <i class="bi bi-lock-fill sv-form-icon"></i>
+                <input
+                  type="password"
+                  name="password"
+                  id="passwordInput"
+                  class="sv-form-input"
+                  placeholder="Your password"
+                  required
+                />
+                <button type="button" class="sv-password-toggle" id="togglePwd">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+              </div>
+              {% if form.non_field_errors %}
+              <div class="sv-form-error">{{ form.non_field_errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <button type="submit" class="sv-auth-submit">
+              <span>Sign In</span>
+              <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+            </button>
+          </form>
+
+          <div class="sv-auth-footer">
+            <p>Don't have an account? <a href="{% url 'register' %}">Create one free</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

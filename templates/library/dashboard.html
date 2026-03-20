@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Dashboard — ScholarVault | UGC Digital Library{% endblock %}
+{% block description %}Your personal research dashboard — bookmarked publications, download history, and recommended reading from the University of Gold Coast PhD library.{% endblock %}
+
+{% block og_title %}My Dashboard — ScholarVault | UGC Digital Library{% endblock %}
+{% block og_description %}Your personal research dashboard — bookmarked publications, download history, and recommended reading from the University of Gold Coast PhD library.{% endblock %}
+{% block twitter_card %}summary{% endblock %}
+{% block twitter_title %}My Dashboard — ScholarVault | UGC{% endblock %}
+{% block twitter_description %}Your personal research dashboard on the University of Gold Coast PhD digital library.{% endblock %}
+
+{% block content %}
+<div class="sv-dashboard-page">
+
+  <!-- Dashboard Header -->
+  <div class="sv-dashboard-header">
+    <div class="container-xl">
+      <div class="sv-dashboard-header-inner">
+        <div class="sv-dashboard-user">
+          <img src="{{ user.avatar_url }}" alt="{{ user.full_name }}" class="sv-dashboard-avatar" />
+          <div>
+            <h1 class="sv-dashboard-greeting">
+              Welcome back, <span>{{ user.first_name }}</span>
+            </h1>
+            <div class="sv-dashboard-role">
+              {{ user.get_role_display }}
+              {% if user.institution %} · {{ user.institution }}{% endif %}
+              {% if user.research_area %} · {{ user.research_area }}{% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="sv-dashboard-header-actions">
+          <a href="{% url 'catalogue' %}" class="sv-btn-primary">
+            <i class="bi bi-search me-2"></i>Browse Library
+          </a>
+          <a href="{% url 'profile' %}" class="sv-btn-ghost">
+            <i class="bi bi-gear me-1"></i>Settings
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-xl py-4">
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--blue">
+          <div class="sv-stat-icon"><i class="bi bi-bookmark-fill"></i></div>
+          <div class="sv-stat-num">{{ bookmark_count }}</div>
+          <div class="sv-stat-label">Saved Papers</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--gold">
+          <div class="sv-stat-icon"><i class="bi bi-download"></i></div>
+          <div class="sv-stat-num">{{ download_count }}</div>
+          <div class="sv-stat-label">Downloads</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--green">
+          <div class="sv-stat-icon"><i class="bi bi-eye-fill"></i></div>
+          <div class="sv-stat-num">{{ recently_viewed.count }}</div>
+          <div class="sv-stat-label">Recently Viewed</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--purple">
+          <div class="sv-stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+          <div class="sv-stat-num">{{ recommended.count }}</div>
+          <div class="sv-stat-label">Recommended</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="row g-5">
+
+      <!-- LEFT COLUMN -->
+      <div class="col-lg-8">
+
+        <!-- Bookmarks Section -->
+        <div class="sv-dashboard-section">
+          <div class="sv-dashboard-section-header">
+            <h2 class="sv-ds-title">
+              <i class="bi bi-bookmark-fill me-2"></i>Saved Publications
+            </h2>
+            <a href="{% url 'catalogue' %}" class="sv-ds-link">Browse More</a>
+          </div>
+
+          {% if bookmarks %}
+          <div class="sv-dashboard-list">
+            {% for bm in bookmarks %}
+            <div class="sv-dash-item">
+              <div class="sv-dash-item-cover">
+                <img src="{{ bm.publication.cover_url }}" alt="{{ bm.publication.title }}" />
+              </div>
+              <div class="sv-dash-item-info">
+                <div class="sv-dash-item-meta">
+                  {{ bm.publication.category.name|default:"General" }} ·
+                  {{ bm.publication.publication_year }}
+                </div>
+                <h5 class="sv-dash-item-title">
+                  <a href="{{ bm.publication.get_absolute_url }}">{{ bm.publication.title|truncatechars:70 }}</a>
+                </h5>
+                <div class="sv-dash-item-author">{{ bm.publication.author }}</div>
+                <div class="sv-dash-item-actions">
+                  {% if bm.publication.is_open_access %}
+                  <a href="{% url 'download_publication' bm.publication.slug %}" class="sv-dash-action">
+                    <i class="bi bi-download me-1"></i>Download
+                  </a>
+                  {% endif %}
+                  <a href="{% url 'toggle_bookmark' bm.publication.slug %}" class="sv-dash-action sv-dash-action--remove">
+                    <i class="bi bi-bookmark-x me-1"></i>Remove
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="sv-empty-card">
+            <i class="bi bi-bookmark"></i>
+            <p>No saved publications yet.</p>
+            <a href="{% url 'catalogue' %}" class="sv-btn-primary">Browse Library</a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Recently Viewed Section -->
+        <div class="sv-dashboard-section mt-5">
+          <div class="sv-dashboard-section-header">
+            <h2 class="sv-ds-title">
+              <i class="bi bi-clock-history me-2"></i>Recently Viewed
+            </h2>
+          </div>
+          {% if recently_viewed %}
+          <div class="row g-3">
+            {% for rv in recently_viewed %}
+            <div class="col-sm-6 col-md-4">
+              <div class="sv-recent-card">
+                <img src="{{ rv.publication.cover_url }}" alt="{{ rv.publication.title }}" />
+                <div class="sv-recent-card-body">
+                  <div class="sv-recent-meta">{{ rv.publication.publication_year }}</div>
+                  <a href="{{ rv.publication.get_absolute_url }}" class="sv-recent-title">
+                    {{ rv.publication.title|truncatechars:50 }}
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="sv-empty-card">
+            <i class="bi bi-eye"></i>
+            <p>No recently viewed publications.</p>
+          </div>
+          {% endif %}
+        </div>
+
+      </div><!-- /col-lg-8 -->
+
+      <!-- RIGHT COLUMN -->
+      <div class="col-lg-4">
+
+        <!-- Profile Card -->
+        <div class="sv-profile-card">
+          <div class="sv-profile-card-header"></div>
+          <div class="sv-profile-card-body">
+            <img src="{{ user.avatar_url }}" alt="{{ user.full_name }}" class="sv-profile-avatar" />
+            <h4 class="sv-profile-name">{{ user.full_name }}</h4>
+            <div class="sv-profile-role">{{ user.get_role_display }}</div>
+            {% if user.institution %}
+            <div class="sv-profile-institution">
+              <i class="bi bi-building me-1"></i>{{ user.institution }}
+            </div>
+            {% endif %}
+            {% if user.research_area %}
+            <div class="sv-profile-research">
+              <i class="bi bi-lightbulb me-1"></i>{{ user.research_area }}
+            </div>
+            {% endif %}
+            {% if user.bio %}
+            <p class="sv-profile-bio">{{ user.bio|truncatechars:120 }}</p>
+            {% endif %}
+            <a href="{% url 'profile' %}" class="sv-btn-outline w-100 mt-3">
+              <i class="bi bi-pencil me-2"></i>Edit Profile
+            </a>
+          </div>
+        </div>
+
+        <!-- Download History -->
+        <div class="sv-dashboard-section mt-4">
+          <div class="sv-dashboard-section-header">
+            <h2 class="sv-ds-title">
+              <i class="bi bi-clock me-2"></i>Download History
+            </h2>
+          </div>
+          {% if downloads %}
+          <div class="sv-history-list">
+            {% for dl in downloads %}
+            <div class="sv-history-item">
+              <div class="sv-history-icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+              <div class="sv-history-info">
+                <a href="{{ dl.publication.get_absolute_url }}" class="sv-history-title">
+                  {{ dl.publication.title|truncatechars:45 }}
+                </a>
+                <div class="sv-history-date">{{ dl.timestamp|date:"M j, Y" }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="sv-empty-card">
+            <i class="bi bi-download"></i>
+            <p>No downloads yet.</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Recommendations -->
+        {% if recommended %}
+        <div class="sv-dashboard-section mt-4">
+          <div class="sv-dashboard-section-header">
+            <h2 class="sv-ds-title">
+              <i class="bi bi-stars me-2"></i>Recommended
+            </h2>
+          </div>
+          <div class="sv-reco-list">
+            {% for rec in recommended %}
+            <div class="sv-reco-item">
+              <img src="{{ rec.cover_url }}" alt="{{ rec.title }}" class="sv-reco-cover" />
+              <div class="sv-reco-info">
+                <a href="{{ rec.get_absolute_url }}" class="sv-reco-title">{{ rec.title|truncatechars:50 }}</a>
+                <div class="sv-reco-author">{{ rec.author }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+      </div><!-- /col-lg-4 -->
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+{% endblock %}

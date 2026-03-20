@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard — ScholarVault | UGC Digital Library{% endblock %}
+{% block description %}Manage publications, categories, and users in the University of Gold Coast PhD digital library administration panel.{% endblock %}
+
+{% block og_title %}Admin Dashboard — ScholarVault | UGC Digital Library{% endblock %}
+{% block og_description %}Manage publications, categories, and users in the University of Gold Coast PhD digital library administration panel.{% endblock %}
+{% block twitter_card %}summary{% endblock %}
+
+{% block content %}
+<div class="sv-admin-page">
+
+  <div class="sv-dashboard-header sv-admin-header">
+    <div class="container-xl">
+      <div class="sv-dashboard-header-inner">
+        <div>
+          <h1 class="sv-dashboard-greeting">Admin <span>Dashboard</span></h1>
+          <div class="sv-dashboard-role">Manage Publications, Categories & Users</div>
+        </div>
+        <a href="{% url 'publication_add' %}" class="sv-btn-primary">
+          <i class="bi bi-plus-circle-fill me-2"></i>Add Publication
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-xl py-4">
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--blue">
+          <div class="sv-stat-icon"><i class="bi bi-journals"></i></div>
+          <div class="sv-stat-num">{{ total_publications }}</div>
+          <div class="sv-stat-label">Publications</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--gold">
+          <div class="sv-stat-icon"><i class="bi bi-people-fill"></i></div>
+          <div class="sv-stat-num">{{ total_users }}</div>
+          <div class="sv-stat-label">Users</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--green">
+          <div class="sv-stat-icon"><i class="bi bi-download"></i></div>
+          <div class="sv-stat-num">{{ total_downloads }}</div>
+          <div class="sv-stat-label">Downloads</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sv-stat-card sv-stat-card--purple">
+          <div class="sv-stat-icon"><i class="bi bi-bookmark-fill"></i></div>
+          <div class="sv-stat-num">{{ total_bookmarks }}</div>
+          <div class="sv-stat-label">Bookmarks</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row g-3 mb-5">
+      <div class="col-md-4">
+        <a href="{% url 'publication_add' %}" class="sv-admin-action-card">
+          <i class="bi bi-file-earmark-plus-fill"></i>
+          <div>
+            <div class="sv-admin-action-title">Add Publication</div>
+            <div class="sv-admin-action-desc">Upload a new book, journal, or thesis</div>
+          </div>
+          <i class="bi bi-chevron-right ms-auto"></i>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{% url 'category_list' %}" class="sv-admin-action-card">
+          <i class="bi bi-tags-fill"></i>
+          <div>
+            <div class="sv-admin-action-title">Manage Categories</div>
+            <div class="sv-admin-action-desc">Add or edit research disciplines</div>
+          </div>
+          <i class="bi bi-chevron-right ms-auto"></i>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{% url 'user_list' %}" class="sv-admin-action-card">
+          <i class="bi bi-people-fill"></i>
+          <div>
+            <div class="sv-admin-action-title">Manage Users</div>
+            <div class="sv-admin-action-desc">View and manage registered researchers</div>
+          </div>
+          <i class="bi bi-chevron-right ms-auto"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Publications Table -->
+    <div class="sv-admin-table-card">
+      <div class="sv-dashboard-section-header">
+        <h2 class="sv-ds-title"><i class="bi bi-journals me-2"></i>Recent Publications</h2>
+        <a href="{% url 'catalogue' %}" class="sv-ds-link">View All Publications</a>
+      </div>
+
+      <div class="sv-table-wrap">
+        <table class="sv-admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Year</th>
+              <th>Downloads</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pub in recent_publications %}
+            <tr>
+              <td>
+                <a href="{{ pub.get_absolute_url }}" class="sv-table-pub-title">
+                  {{ pub.title|truncatechars:45 }}
+                </a>
+              </td>
+              <td class="sv-table-meta">{{ pub.author|truncatechars:25 }}</td>
+              <td><span class="sv-type-badge">{{ pub.get_publication_type_display }}</span></td>
+              <td class="sv-table-meta">{{ pub.category.name|default:"—" }}</td>
+              <td class="sv-table-meta">{{ pub.publication_year }}</td>
+              <td class="sv-table-meta">{{ pub.download_count }}</td>
+              <td>
+                {% if pub.is_published %}
+                <span class="sv-status-pill sv-status-pill--active">Published</span>
+                {% else %}
+                <span class="sv-status-pill sv-status-pill--draft">Draft</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="sv-table-actions">
+                  <a href="{% url 'publication_edit' pub.slug %}" class="sv-table-action-btn sv-table-action-btn--edit" title="Edit">
+                    <i class="bi bi-pencil-fill"></i>
+                  </a>
+                  <a href="{% url 'publication_delete' pub.slug %}" class="sv-table-action-btn sv-table-action-btn--delete" title="Delete">
+                    <i class="bi bi-trash-fill"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Most Popular -->
+    {% if popular_publications %}
+    <div class="sv-admin-table-card mt-4">
+      <div class="sv-dashboard-section-header">
+        <h2 class="sv-ds-title"><i class="bi bi-fire me-2"></i>Most Downloaded</h2>
+      </div>
+      <div class="row g-3">
+        {% for pub in popular_publications %}
+        <div class="col-md-6 col-lg-4">
+          <div class="sv-dash-item" style="border:1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+            <div class="sv-dash-item-cover">
+              <img src="{{ pub.cover_url }}" alt="{{ pub.title }}" />
+            </div>
+            <div class="sv-dash-item-info">
+              <a href="{{ pub.get_absolute_url }}" class="sv-dash-item-title" style="font-size:0.85rem;">{{ pub.title|truncatechars:50 }}</a>
+              <div class="sv-dash-item-author">{{ pub.author }}</div>
+              <div class="mt-2"><strong>{{ pub.download_count }}</strong> downloads</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

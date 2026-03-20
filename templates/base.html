@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ScholarVault — PhD Digital Library | University of Gold Coast{% endblock %}</title>
+  <meta name="description" content="{% block description %}Access peer-reviewed textbooks, doctoral theses, and research journals curated for the University of Gold Coast PhD programme.{% endblock %}" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="{{ request.build_absolute_uri }}" />
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="ScholarVault — UGC Digital Library" />
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}" />
+  <meta property="og:title" content="{% block og_title %}ScholarVault — PhD Digital Library | University of Gold Coast{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}Access peer-reviewed textbooks, doctoral theses, and research journals curated for the University of Gold Coast PhD programme.{% endblock %}" />
+  <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-default.jpg' %}{% endblock %}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_GH" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="{% block twitter_card %}summary_large_image{% endblock %}" />
+  <meta name="twitter:site" content="@UGCLibrary" />
+  <meta name="twitter:title" content="{% block twitter_title %}ScholarVault — PhD Digital Library | University of Gold Coast{% endblock %}" />
+  <meta name="twitter:description" content="{% block twitter_description %}Access peer-reviewed textbooks, doctoral theses, and research journals curated for the University of Gold Coast PhD programme.{% endblock %}" />
+  <meta name="twitter:image" content="{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-default.jpg' %}{% endblock %}" />
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Fonts: Playfair Display + DM Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══════ NAVBAR ═══════ -->
+<nav class="sv-navbar navbar navbar-expand-lg sticky-top" id="mainNav">
+  <div class="container-xl">
+    <!-- Brand -->
+    <a class="navbar-brand sv-brand" href="{% url 'landing' %}">
+      <div class="sv-brand-icon">
+        <i class="bi bi-journal-bookmark-fill"></i>
+      </div>
+      <div class="sv-brand-text">
+        <span class="sv-brand-name">ScholarVault</span>
+        <span class="sv-brand-tagline">PhD Digital Library</span>
+      </div>
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler sv-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Nav Links -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto sv-nav-links">
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'landing' %}active{% endif %}" href="{% url 'landing' %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'catalogue' %}active{% endif %}" href="{% url 'catalogue' %}">Library</a>
+        </li>
+        {% if user.is_authenticated and user.is_staff %}
+        <li class="nav-item">
+          <a class="nav-link {% if 'manage' in request.path %}active{% endif %}" href="{% url 'admin_dashboard' %}">Manage</a>
+        </li>
+        {% endif %}
+      </ul>
+
+      <!-- Right Actions -->
+      <div class="sv-nav-actions d-flex align-items-center gap-3">
+        <!-- Search Icon -->
+        <button class="sv-nav-search-btn" id="navSearchBtn" title="Quick Search">
+          <i class="bi bi-search"></i>
+        </button>
+
+        {% if user.is_authenticated %}
+        <!-- User Menu -->
+        <div class="dropdown">
+          <button class="sv-user-btn dropdown-toggle" data-bs-toggle="dropdown">
+            <img src="{{ user.avatar_url }}" alt="{{ user.full_name }}" class="sv-avatar-sm" />
+            <span class="sv-user-name d-none d-lg-inline">{{ user.first_name }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end sv-dropdown">
+            <li>
+              <div class="sv-dropdown-header">
+                <img src="{{ user.avatar_url }}" alt="{{ user.full_name }}" class="sv-avatar-md" />
+                <div>
+                  <div class="sv-dropdown-name">{{ user.full_name }}</div>
+                  <div class="sv-dropdown-role">{{ user.get_role_display }}</div>
+                </div>
+              </div>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a></li>
+            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item sv-logout" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+        {% else %}
+        <a href="{% url 'login' %}" class="sv-btn-ghost">Sign In</a>
+        <a href="{% url 'register' %}" class="sv-btn-primary">Get Access</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Quick Search Overlay -->
+<div class="sv-search-overlay" id="searchOverlay">
+  <div class="sv-search-overlay-inner">
+    <div class="sv-search-overlay-box">
+      <i class="bi bi-search sv-search-icon-lg"></i>
+      <input type="text" id="overlaySearchInput" placeholder="Search publications, authors, topics…" autocomplete="off" />
+      <button class="sv-search-close" id="searchOverlayClose"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div id="overlaySearchResults" class="sv-overlay-results"></div>
+  </div>
+</div>
+
+<!-- ═══════ MESSAGES ═══════ -->
+{% if messages %}
+<div class="sv-messages-container">
+  {% for msg in messages %}
+  <div class="sv-toast sv-toast--{{ msg.tags }}" role="alert">
+    <i class="bi bi-{% if msg.tags == 'success' %}check-circle-fill{% elif msg.tags == 'error' or msg.tags == 'danger' %}exclamation-circle-fill{% else %}info-circle-fill{% endif %} me-2"></i>
+    {{ msg }}
+    <button type="button" class="sv-toast-close">&times;</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══════ MAIN CONTENT ═══════ -->
+<main id="mainContent">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="sv-footer">
+  <div class="container-xl">
+    <div class="row g-5">
+      <!-- Brand column -->
+      <div class="col-lg-4">
+        <div class="sv-footer-brand">
+          <i class="bi bi-journal-bookmark-fill"></i>
+          <span>ScholarVault</span>
+        </div>
+        <p class="sv-footer-desc">Empowering doctoral researchers with instant access to global scholarly knowledge. Built for the next generation of academic excellence.</p>
+        <div class="sv-footer-socials">
+          <a href="#"><i class="bi bi-twitter-x"></i></a>
+          <a href="#"><i class="bi bi-linkedin"></i></a>
+          <a href="#"><i class="bi bi-github"></i></a>
+          <a href="#"><i class="bi bi-envelope-fill"></i></a>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="col-6 col-lg-2">
+        <h6 class="sv-footer-heading">Library</h6>
+        <ul class="sv-footer-links">
+          <li><a href="{% url 'catalogue' %}">Browse All</a></li>
+          <li><a href="{% url 'catalogue' %}?type=journal">Journals</a></li>
+          <li><a href="{% url 'catalogue' %}?type=thesis">Theses</a></li>
+          <li><a href="{% url 'catalogue' %}?type=book">Books</a></li>
+          <li><a href="{% url 'catalogue' %}?open_access=1">Open Access</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h6 class="sv-footer-heading">Account</h6>
+        <ul class="sv-footer-links">
+          {% if user.is_authenticated %}
+          <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'profile' %}">Profile</a></li>
+          {% else %}
+          <li><a href="{% url 'register' %}">Register</a></li>
+          <li><a href="{% url 'login' %}">Sign In</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <div class="col-lg-4">
+        <h6 class="sv-footer-heading">Stay Updated</h6>
+        <p class="sv-footer-desc" style="font-size:0.85rem;">Get notified when new publications are added to your research area.</p>
+        <div class="sv-footer-subscribe">
+          <input type="email" placeholder="your@university.edu" />
+          <button>Subscribe</button>
+        </div>
+        <div class="sv-footer-stats mt-4 d-flex gap-4">
+          <div>
+            <div class="sv-footer-stat-num" id="footerPubCount">—</div>
+            <div class="sv-footer-stat-label">Publications</div>
+          </div>
+          <div>
+            <div class="sv-footer-stat-num" id="footerCatCount">—</div>
+            <div class="sv-footer-stat-label">Disciplines</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sv-footer-bottom">
+      <span>© 2025 ScholarVault. Built for PhD Researchers Worldwide.</span>
+      <div class="sv-footer-bottom-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JS -->
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+
+<script>
+// Load footer stats
+fetch('/api/stats/')
+  .then(r => r.json())
+  .then(d => {
+    const pc = document.getElementById('footerPubCount');
+    const cc = document.getElementById('footerCatCount');
+    if(pc) pc.textContent = d.total_publications?.toLocaleString() ?? '—';
+    if(cc) cc.textContent = d.total_categories?.toLocaleString() ?? '—';
+  }).catch(() => {});
+</script>
+</body>
+</html>

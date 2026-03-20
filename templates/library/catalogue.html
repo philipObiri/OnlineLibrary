@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse the Library — ScholarVault | University of Gold Coast{% endblock %}
+{% block description %}Search and filter 90+ academic publications — textbooks, theses, and journals — across Research Methods, Finance, Marketing, Strategic Management, Governance, and more. Curated for UGC doctoral students.{% endblock %}
+
+{% block og_title %}Browse the Library — ScholarVault | University of Gold Coast{% endblock %}
+{% block og_description %}Search and filter 90+ academic publications across Research Methods, Finance, Marketing, Strategic Management, Governance, and more. Free access for UGC PhD students.{% endblock %}
+{% block og_type %}website{% endblock %}
+
+{% block twitter_title %}Browse the Library — ScholarVault | UGC{% endblock %}
+{% block twitter_description %}Search 90+ textbooks, theses, and journals curated for the University of Gold Coast PhD programme. Filter by discipline, year, and type.{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="sv-page-header">
+  <div class="container-xl">
+    <div class="sv-page-header-inner">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb sv-breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'landing' %}">Home</a></li>
+            <li class="breadcrumb-item active">Library</li>
+          </ol>
+        </nav>
+        <h1 class="sv-page-title">Research Library</h1>
+        <p class="sv-page-subtitle">
+          <span id="resultCount">{{ total_results }}</span> publications available
+        </p>
+      </div>
+      <!-- View Toggle -->
+      <div class="sv-view-toggle">
+        <button class="sv-view-btn active" id="gridViewBtn" title="Grid view">
+          <i class="bi bi-grid-3x3-gap-fill"></i>
+        </button>
+        <button class="sv-view-btn" id="listViewBtn" title="List view">
+          <i class="bi bi-list-ul"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-xl py-4">
+  <div class="row g-4">
+
+    <!-- ═══ LEFT SIDEBAR FILTERS ═══ -->
+    <div class="col-lg-3">
+      <div class="sv-filter-panel" id="filterPanel">
+        <div class="sv-filter-header">
+          <h5 class="sv-filter-title">
+            <i class="bi bi-funnel-fill me-2"></i>Filters
+          </h5>
+          <button class="sv-filter-clear" id="clearFiltersBtn">Clear All</button>
+        </div>
+
+        <!-- Search -->
+        <div class="sv-filter-group">
+          <label class="sv-filter-label">Search</label>
+          <div class="sv-filter-search">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              class="sv-filter-input"
+              placeholder="Keywords, title, author…"
+              value="{{ current_filters.q }}"
+            />
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="sv-filter-group">
+          <label class="sv-filter-label">Discipline / Category</label>
+          <div class="sv-filter-options" id="categoryFilters">
+            <div class="sv-filter-option {% if not current_filters.category %}active{% endif %}" data-filter="category" data-value="">
+              <span>All Disciplines</span>
+            </div>
+            {% for cat in categories %}
+            <div class="sv-filter-option {% if current_filters.category == cat.slug %}active{% endif %}" data-filter="category" data-value="{{ cat.slug }}">
+              <span>{{ cat.name }}</span>
+              <span class="sv-filter-count">{{ cat.pub_count }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Publication Type -->
+        <div class="sv-filter-group">
+          <label class="sv-filter-label">Publication Type</label>
+          <div class="sv-filter-options">
+            <div class="sv-filter-option {% if not current_filters.type %}active{% endif %}" data-filter="type" data-value="">All Types</div>
+            {% for value, label in publication_types %}
+            <div class="sv-filter-option {% if current_filters.type == value %}active{% endif %}" data-filter="type" data-value="{{ value }}">{{ label }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Year Range -->
+        <div class="sv-filter-group">
+          <label class="sv-filter-label">Year Range</label>
+          <div class="sv-year-range">
+            <input type="number" id="yearFrom" class="sv-year-input" placeholder="From" min="1900" max="2030" value="{{ current_filters.year_from }}" />
+            <span class="sv-year-sep">—</span>
+            <input type="number" id="yearTo" class="sv-year-input" placeholder="To" min="1900" max="2030" value="{{ current_filters.year_to }}" />
+          </div>
+        </div>
+
+        <!-- Author -->
+        <div class="sv-filter-group">
+          <label class="sv-filter-label">Author</label>
+          <input type="text" id="authorFilter" class="sv-filter-input" placeholder="Search by author" value="{{ current_filters.author }}" />
+        </div>
+
+        <!-- Open Access Toggle -->
+        <div class="sv-filter-group">
+          <div class="sv-filter-toggle-row">
+            <label class="sv-filter-label mb-0">Open Access Only</label>
+            <label class="sv-toggle">
+              <input type="checkbox" id="openAccessFilter" {% if current_filters.open_access == '1' %}checked{% endif %} />
+              <span class="sv-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Sort -->
+        <div class="sv-filter-group">
+          <label class="sv-filter-label">Sort By</label>
+          <select id="sortFilter" class="sv-filter-select">
+            <option value="-created_at" {% if current_filters.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+            <option value="created_at" {% if current_filters.sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+            <option value="-publication_year" {% if current_filters.sort == '-publication_year' %}selected{% endif %}>Year (Newest)</option>
+            <option value="publication_year" {% if current_filters.sort == 'publication_year' %}selected{% endif %}>Year (Oldest)</option>
+            <option value="title" {% if current_filters.sort == 'title' %}selected{% endif %}>Title (A–Z)</option>
+            <option value="-view_count" {% if current_filters.sort == '-view_count' %}selected{% endif %}>Most Viewed</option>
+            <option value="-download_count" {% if current_filters.sort == '-download_count' %}selected{% endif %}>Most Downloaded</option>
+          </select>
+        </div>
+
+        <!-- Apply Button (mobile) -->
+        <button class="sv-btn-primary w-100 d-lg-none mt-3" id="applyFiltersBtn">
+          Apply Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="col-lg-9">
+
+      <!-- Active Filters Pills -->
+      <div class="sv-active-filters" id="activeFilters"></div>
+
+      <!-- Loading indicator -->
+      <div class="sv-loading" id="loadingIndicator" style="display:none;">
+        <div class="sv-spinner"></div>
+        <span>Searching publications…</span>
+      </div>
+
+      <!-- Results Grid -->
+      <div class="sv-pub-grid" id="publicationsGrid">
+        {% for pub in publications %}
+        {% include 'components/publication_card.html' with pub=pub %}
+        {% empty %}
+        <div class="sv-empty-state" id="emptyState">
+          <i class="bi bi-search"></i>
+          <h4>No publications found</h4>
+          <p>Try adjusting your search terms or filters.</p>
+          <button class="sv-btn-primary" id="resetSearchBtn">Clear Filters</button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <div class="sv-pagination" id="paginationContainer">
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Publication pages">
+          <ul class="sv-page-list">
+            {% if page_obj.has_previous %}
+            <li>
+              <a class="sv-page-btn sv-page-nav" href="?{% for k,v in current_filters.items %}{% if v %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                <i class="bi bi-chevron-left"></i>
+              </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+              <li><span class="sv-page-btn active">{{ num }}</span></li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li>
+                <a class="sv-page-btn" href="?{% for k,v in current_filters.items %}{% if v %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+              </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li>
+              <a class="sv-page-btn sv-page-nav" href="?{% for k,v in current_filters.items %}{% if v %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Filter Toggle -->
+<button class="sv-mobile-filter-btn d-lg-none" id="mobileFilterBtn">
+  <i class="bi bi-funnel-fill me-2"></i>Filters
+</button>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Pass Django data to JS
+  const CATALOGUE_CONFIG = {
+    apiUrl: '/api/publications/search/',
+    csrfToken: '{{ csrf_token }}',
+    currentFilters: {{ current_filters|safe }},
+  };
+</script>
+<script src="{% static 'js/catalogue.js' %}"></script>
+{% endblock %}

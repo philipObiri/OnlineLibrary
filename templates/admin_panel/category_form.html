@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Category — ScholarVault{% endblock %}
+
+{% block content %}
+<div class="container-xl py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb sv-breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Categories</a></li>
+          <li class="breadcrumb-item active">{% if object %}Edit{% else %}Add{% endif %}</li>
+        </ol>
+      </nav>
+
+      <div class="sv-auth-card">
+        <div class="sv-auth-card-header">
+          <h2 class="sv-auth-title">
+            {% if object %}Edit Category{% else %}Add New Category{% endif %}
+          </h2>
+          <p class="sv-auth-subtitle">
+            {% if object %}Update "{{ object.name }}"{% else %}Create a new research discipline or subject area{% endif %}
+          </p>
+        </div>
+
+        <form method="POST">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger mb-3">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="sv-form-group">
+                <label class="sv-form-label">Name *</label>
+                <input type="text" name="name" class="sv-form-input" placeholder="e.g. Computer Science" value="{{ form.name.value|default:'' }}" required />
+                {% if form.name.errors %}<div class="sv-form-error">{{ form.name.errors.as_text }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="sv-form-group">
+                <label class="sv-form-label">Description</label>
+                <textarea name="description" class="sv-form-input" rows="3" placeholder="Brief description of this discipline…">{{ form.description.value|default:'' }}</textarea>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="sv-form-group">
+                <label class="sv-form-label">Bootstrap Icon Class</label>
+                <input type="text" name="icon" class="sv-form-input" placeholder="bi-book" value="{{ form.icon.value|default:'' }}" />
+                <div class="sv-form-hint">Browse icons at <a href="https://icons.getbootstrap.com/" target="_blank">icons.getbootstrap.com</a></div>
+                {% if form.icon.value %}
+                <div class="mt-2"><i class="bi {{ form.icon.value }}" style="font-size:1.5rem;"></i> preview</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="sv-form-group">
+                <label class="sv-form-label">Color</label>
+                <div class="d-flex align-items-center gap-3">
+                  <input type="color" name="color" class="sv-form-input" style="width:60px;height:44px;padding:2px;" value="{{ form.color.value|default:'#1B3A6B' }}" />
+                  <span class="sv-form-hint mb-0">Pick a colour for this category's badge</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mt-5">
+            <button type="submit" class="sv-auth-submit flex-grow-1">
+              <span>{% if object %}Save Changes{% else %}Create Category{% endif %}</span>
+              <i class="bi bi-check-circle-fill ms-2"></i>
+            </button>
+            <a href="{% url 'category_list' %}" class="sv-btn-ghost px-4">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

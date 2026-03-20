@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Delete Publication — ScholarVault{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:500px;">
+  <div class="sv-auth-card text-center">
+    <div style="font-size:3rem;color:#dc3545;margin-bottom:1rem;"><i class="bi bi-trash-fill"></i></div>
+    <h3>Delete Publication?</h3>
+    <p class="text-muted">You are about to permanently delete:<br><strong>"{{ object.title }}"</strong></p>
+    <form method="POST" class="d-flex gap-3 justify-content-center mt-4">
+      {% csrf_token %}
+      <button type="submit" class="sv-auth-submit" style="background:#dc3545;">Yes, Delete</button>
+      <a href="{% url 'admin_dashboard' %}" class="sv-btn-ghost px-4">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

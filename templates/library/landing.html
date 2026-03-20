@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ScholarVault — PhD Digital Library | University of Gold Coast{% endblock %}
+{% block description %}Discover 90+ peer-reviewed textbooks, doctoral theses, and academic journals curated for the University of Gold Coast PhD in Business Administration programme. Open access. Always free.{% endblock %}
+
+{% block og_title %}ScholarVault — PhD Digital Library | University of Gold Coast{% endblock %}
+{% block og_description %}Discover 90+ peer-reviewed textbooks, doctoral theses, and academic journals curated for the University of Gold Coast PhD in Business Administration programme. Open access. Always free.{% endblock %}
+{% block og_type %}website{% endblock %}
+
+{% block twitter_title %}ScholarVault — PhD Digital Library | University of Gold Coast{% endblock %}
+{% block twitter_description %}Discover 90+ peer-reviewed textbooks, doctoral theses, and academic journals curated for the UGC PhD programme. Open access. Always free.{% endblock %}
+
+{% block content %}
+
+<!-- ═══════ HERO ═══════ -->
+<section class="sv-hero">
+  <div class="sv-hero-bg">
+    <div class="sv-hero-orb sv-hero-orb--1"></div>
+    <div class="sv-hero-orb sv-hero-orb--2"></div>
+    <div class="sv-hero-grid"></div>
+  </div>
+  <div class="container-xl sv-hero-content">
+    <div class="sv-hero-badge">
+      <i class="bi bi-mortarboard-fill me-2"></i>
+      For PhD Students & Researchers
+    </div>
+    <h1 class="sv-hero-title">
+      Access Global<br>
+      <span class="sv-hero-accent">Research</span> Instantly
+    </h1>
+    <p class="sv-hero-subtitle">
+      A curated digital library of scholarly journals, theses, and books<br class="d-none d-md-block">
+      designed exclusively for doctoral researchers worldwide.
+    </p>
+
+    <!-- Hero Search -->
+    <div class="sv-hero-search-wrap">
+      <form class="sv-hero-search" action="{% url 'catalogue' %}" method="GET">
+        <div class="sv-hero-search-inner">
+          <i class="bi bi-search sv-hero-search-icon"></i>
+          <input
+            type="text"
+            name="q"
+            id="heroSearchInput"
+            class="sv-hero-search-input"
+            placeholder="Search publications, authors, journals, topics…"
+            autocomplete="off"
+          />
+          <div class="sv-hero-search-divider"></div>
+          <select name="type" class="sv-hero-search-type">
+            <option value="">All Types</option>
+            <option value="book">Books</option>
+            <option value="journal">Journals</option>
+            <option value="thesis">Theses</option>
+            <option value="conference">Conference Papers</option>
+          </select>
+          <button type="submit" class="sv-hero-search-btn">
+            <span>Search</span>
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </form>
+      <!-- Autocomplete Dropdown -->
+      <div class="sv-hero-autocomplete" id="heroAutocomplete"></div>
+    </div>
+
+    <!-- Quick tags -->
+    <div class="sv-hero-tags">
+      <span class="sv-hero-tag-label">Popular:</span>
+      <a href="{% url 'catalogue' %}?q=machine+learning" class="sv-hero-tag">Machine Learning</a>
+      <a href="{% url 'catalogue' %}?q=climate+change" class="sv-hero-tag">Climate Change</a>
+      <a href="{% url 'catalogue' %}?q=neuroscience" class="sv-hero-tag">Neuroscience</a>
+      <a href="{% url 'catalogue' %}?q=quantum+computing" class="sv-hero-tag">Quantum Computing</a>
+      <a href="{% url 'catalogue' %}?open_access=1" class="sv-hero-tag sv-hero-tag--oa">
+        <i class="bi bi-unlock-fill me-1"></i>Open Access
+      </a>
+    </div>
+
+    <!-- Hero Stats -->
+    <div class="sv-hero-stats">
+      <div class="sv-hero-stat">
+        <div class="sv-hero-stat-num">{{ total_publications|default:"10K+" }}</div>
+        <div class="sv-hero-stat-label">Publications</div>
+      </div>
+      <div class="sv-hero-stat-divider"></div>
+      <div class="sv-hero-stat">
+        <div class="sv-hero-stat-num">{{ open_access_count|default:"8K+" }}</div>
+        <div class="sv-hero-stat-label">Open Access</div>
+      </div>
+      <div class="sv-hero-stat-divider"></div>
+      <div class="sv-hero-stat">
+        <div class="sv-hero-stat-num">{{ total_categories|default:"50+" }}</div>
+        <div class="sv-hero-stat-label">Disciplines</div>
+      </div>
+      <div class="sv-hero-stat-divider"></div>
+      <div class="sv-hero-stat">
+        <div class="sv-hero-stat-num">190+</div>
+        <div class="sv-hero-stat-label">Universities</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll Indicator -->
+  <div class="sv-hero-scroll">
+    <div class="sv-hero-scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ═══════ CATEGORIES ═══════ -->
+<section class="sv-section sv-categories-section">
+  <div class="container-xl">
+    <div class="sv-section-header">
+      <div class="sv-section-badge">Browse by Discipline</div>
+      <h2 class="sv-section-title">Explore Research Areas</h2>
+      <p class="sv-section-subtitle">Dive into curated collections across all major academic disciplines.</p>
+    </div>
+
+    <div class="row g-4 sv-categories-grid">
+      {% for cat in categories %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="{% url 'catalogue' %}?category={{ cat.slug }}" class="sv-category-card">
+          <div class="sv-category-card-inner" style="--cat-color: {{ cat.color }}">
+            <div class="sv-category-icon">
+              <i class="bi {{ cat.icon|default:'bi-book' }}"></i>
+            </div>
+            <h3 class="sv-category-name">{{ cat.name }}</h3>
+            <div class="sv-category-count">
+              {{ cat.pub_count }} publication{{ cat.pub_count|pluralize }}
+            </div>
+            <div class="sv-category-arrow">
+              <i class="bi bi-arrow-right"></i>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <!-- Placeholder categories if none exist -->
+      {% for item in "12345678" %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="sv-category-card sv-skeleton-card">
+          <div class="sv-skeleton-line"></div>
+          <div class="sv-skeleton-line sv-skeleton-line--short"></div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{% url 'catalogue' %}" class="sv-btn-outline">
+        View All Disciplines
+        <i class="bi bi-arrow-right ms-2"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FEATURED PUBLICATIONS ═══════ -->
+<section class="sv-section sv-featured-section">
+  <div class="sv-featured-bg"></div>
+  <div class="container-xl">
+    <div class="sv-section-header sv-section-header--light">
+      <div class="sv-section-badge sv-section-badge--light">Trending Research</div>
+      <h2 class="sv-section-title sv-section-title--light">Featured Publications</h2>
+      <p class="sv-section-subtitle sv-section-subtitle--light">Most accessed research this week across all disciplines.</p>
+    </div>
+
+    <div class="sv-featured-carousel" id="featuredCarousel">
+      <div class="sv-featured-track" id="featuredTrack">
+        {% for pub in featured %}
+        <div class="sv-featured-card">
+          <div class="sv-featured-card-cover">
+            <img src="{{ pub.cover_url }}" alt="{{ pub.title }}" loading="lazy" />
+            <div class="sv-featured-type-badge">{{ pub.get_publication_type_display }}</div>
+            {% if pub.is_open_access %}
+            <div class="sv-oa-badge"><i class="bi bi-unlock-fill"></i></div>
+            {% endif %}
+          </div>
+          <div class="sv-featured-card-body">
+            <div class="sv-featured-category">{{ pub.category.name|default:"General" }}</div>
+            <h4 class="sv-featured-title">
+              <a href="{{ pub.get_absolute_url }}">{{ pub.title|truncatechars:70 }}</a>
+            </h4>
+            <div class="sv-featured-author">
+              <i class="bi bi-person me-1"></i>{{ pub.author }}
+            </div>
+            <div class="sv-featured-meta">
+              <span><i class="bi bi-calendar3 me-1"></i>{{ pub.publication_year }}</span>
+              <span><i class="bi bi-eye me-1"></i>{{ pub.view_count }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="sv-carousel-controls">
+        <button class="sv-carousel-btn" id="carouselPrev">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="sv-carousel-dots" id="carouselDots"></div>
+        <button class="sv-carousel-btn" id="carouselNext">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ HOW IT WORKS ═══════ -->
+<section class="sv-section sv-how-section">
+  <div class="container-xl">
+    <div class="sv-section-header">
+      <div class="sv-section-badge">Simple Process</div>
+      <h2 class="sv-section-title">How ScholarVault Works</h2>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-4">
+        <div class="sv-how-step">
+          <div class="sv-how-step-num">01</div>
+          <div class="sv-how-icon"><i class="bi bi-person-plus-fill"></i></div>
+          <h4 class="sv-how-title">Create Account</h4>
+          <p class="sv-how-desc">Register with your institutional email to unlock full library access and personalized features.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sv-how-step">
+          <div class="sv-how-step-num">02</div>
+          <div class="sv-how-icon sv-how-icon--gold"><i class="bi bi-search-heart-fill"></i></div>
+          <h4 class="sv-how-title">Search & Filter</h4>
+          <p class="sv-how-desc">Use our powerful AJAX-powered search to find publications by keyword, author, year, or discipline.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sv-how-step">
+          <div class="sv-how-step-num">03</div>
+          <div class="sv-how-icon sv-how-icon--green"><i class="bi bi-download"></i></div>
+          <h4 class="sv-how-title">Download & Cite</h4>
+          <p class="sv-how-desc">Download open-access papers and export citations in APA, MLA or Chicago format instantly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ RECENT PUBLICATIONS ═══════ -->
+<section class="sv-section sv-recent-section">
+  <div class="container-xl">
+    <div class="sv-section-header-row">
+      <div>
+        <div class="sv-section-badge">Just Added</div>
+        <h2 class="sv-section-title">Recent Publications</h2>
+      </div>
+      <a href="{% url 'catalogue' %}?sort=-created_at" class="sv-btn-outline">
+        View All <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for pub in recent_publications %}
+      <div class="col-md-6 col-lg-3">
+        <div class="sv-pub-card">
+          <div class="sv-pub-card-cover">
+            <img src="{{ pub.cover_url }}" alt="{{ pub.title }}" loading="lazy" />
+            <div class="sv-pub-type">{{ pub.get_publication_type_display }}</div>
+          </div>
+          <div class="sv-pub-card-body">
+            <span class="sv-pub-category">{{ pub.category.name|default:"General" }}</span>
+            <h5 class="sv-pub-title">
+              <a href="{{ pub.get_absolute_url }}">{{ pub.title|truncatechars:60 }}</a>
+            </h5>
+            <div class="sv-pub-author">{{ pub.author }}</div>
+            <div class="sv-pub-footer">
+              <span class="sv-pub-year">{{ pub.publication_year }}</span>
+              {% if pub.is_open_access %}
+              <span class="sv-oa-pill"><i class="bi bi-unlock-fill me-1"></i>Open Access</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CTA SECTION ═══════ -->
+{% if not user.is_authenticated %}
+<section class="sv-cta-section">
+  <div class="sv-cta-bg">
+    <div class="sv-cta-orb sv-cta-orb--1"></div>
+    <div class="sv-cta-orb sv-cta-orb--2"></div>
+  </div>
+  <div class="container-xl sv-cta-content">
+    <div class="sv-cta-icon"><i class="bi bi-mortarboard-fill"></i></div>
+    <h2 class="sv-cta-title">Ready to Advance Your Research?</h2>
+    <p class="sv-cta-subtitle">
+      Join thousands of PhD students and researchers accessing world-class scholarly content. Free for academic use.
+    </p>
+    <div class="sv-cta-actions">
+      <a href="{% url 'register' %}" class="sv-cta-btn-primary">
+        <i class="bi bi-person-plus-fill me-2"></i>
+        Create Free Account
+      </a>
+      <a href="{% url 'catalogue' %}" class="sv-cta-btn-secondary">
+        Browse Library
+        <i class="bi bi-arrow-right ms-2"></i>
+      </a>
+    </div>
+    <div class="sv-cta-trust">
+      <div class="sv-cta-trust-item"><i class="bi bi-shield-check me-1"></i>No credit card required</div>
+      <div class="sv-cta-trust-item"><i class="bi bi-unlock me-1"></i>Open access available</div>
+      <div class="sv-cta-trust-item"><i class="bi bi-globe me-1"></i>Access anywhere</div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/landing.js' %}"></script>
+{% endblock %}
