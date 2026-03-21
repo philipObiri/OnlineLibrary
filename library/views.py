@@ -9,10 +9,14 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.http import FileResponse, Http404, JsonResponse
 from django.urls import reverse_lazy
 from django.db.models import Q, Count, Avg
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
 import os
+
+# Only cache in production; skip cache during development so changes show immediately
+_landing_cache = cache_page(60 * 10) if not settings.DEBUG else (lambda f: f)
 
 from .models import Publication, Category, Bookmark, DownloadHistory, RecentlyViewed
 from .forms import PublicationForm, CategoryForm, UserAdminForm
@@ -21,7 +25,7 @@ from users.models import User
 
 # ─── Landing Page ─────────────────────────────────────────────────────────────
 
-@method_decorator(cache_page(60 * 10), name='dispatch')  # cache 10 min
+@method_decorator(_landing_cache, name='dispatch')
 class LandingView(TemplateView):
     template_name = 'library/landing.html'
 

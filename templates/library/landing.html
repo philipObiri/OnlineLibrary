@@ -66,16 +66,17 @@
     </div>
 
     <!-- Quick tags -->
+    {% if categories %}
     <div class="sv-hero-tags">
-      <span class="sv-hero-tag-label">Popular:</span>
-      <a href="{% url 'catalogue' %}?q=machine+learning" class="sv-hero-tag">Machine Learning</a>
-      <a href="{% url 'catalogue' %}?q=climate+change" class="sv-hero-tag">Climate Change</a>
-      <a href="{% url 'catalogue' %}?q=neuroscience" class="sv-hero-tag">Neuroscience</a>
-      <a href="{% url 'catalogue' %}?q=quantum+computing" class="sv-hero-tag">Quantum Computing</a>
+      <span class="sv-hero-tag-label">Browse:</span>
+      {% for cat in categories %}
+      <a href="{% url 'catalogue' %}?category={{ cat.slug }}" class="sv-hero-tag">{{ cat.name }}</a>
+      {% endfor %}
       <a href="{% url 'catalogue' %}?open_access=1" class="sv-hero-tag sv-hero-tag--oa">
         <i class="bi bi-unlock-fill me-1"></i>Open Access
       </a>
     </div>
+    {% endif %}
 
     <!-- Hero Stats -->
     <div class="sv-hero-stats">
@@ -92,11 +93,6 @@
       <div class="sv-hero-stat">
         <div class="sv-hero-stat-num">{{ total_categories|default:"50+" }}</div>
         <div class="sv-hero-stat-label">Disciplines</div>
-      </div>
-      <div class="sv-hero-stat-divider"></div>
-      <div class="sv-hero-stat">
-        <div class="sv-hero-stat-num">190+</div>
-        <div class="sv-hero-stat-label">Universities</div>
       </div>
     </div>
   </div>
