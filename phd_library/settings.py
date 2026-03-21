@@ -8,7 +8,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-phd-library-dev-key-change-in-prod-!@#$%^&*()')
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = False
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'library.ugc.edu.gh', 'www.library.ugc.edu.gh']
 
 # Application definition
