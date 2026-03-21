@@ -74,8 +74,8 @@ class Publication(models.Model):
     isbn = models.CharField(max_length=20, blank=True, verbose_name='ISBN')
     
     # Files & Media
-    file = models.FileField(upload_to='publications/', null=True, blank=True)
-    cover_image = models.ImageField(upload_to='covers/', null=True, blank=True)
+    file = models.FileField(upload_to='publications/', null=True, blank=True, max_length=500)
+    cover_image = models.ImageField(upload_to='covers/', null=True, blank=True, max_length=500)
     external_url = models.URLField(blank=True)
     
     # Access Control
