@@ -21,23 +21,21 @@ from users.models import User
 
 # ─── Landing Page ─────────────────────────────────────────────────────────────
 
+@method_decorator(cache_page(60 * 10), name='dispatch')  # cache 10 min
 class LandingView(TemplateView):
     template_name = 'library/landing.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['featured'] = Publication.objects.filter(
-            is_published=True
-        ).select_related('category').order_by('-view_count', '-created_at')[:6]
+        published = Publication.objects.filter(is_published=True)
+        context['featured'] = published.select_related('category').order_by('-view_count', '-created_at')[:6]
         context['categories'] = Category.objects.annotate(
             pub_count=Count('publications', filter=Q(publications__is_published=True))
         ).order_by('-pub_count')[:8]
-        context['total_publications'] = Publication.objects.filter(is_published=True).count()
+        context['total_publications'] = published.count()
         context['total_categories'] = Category.objects.count()
-        context['open_access_count'] = Publication.objects.filter(is_open_access=True, is_published=True).count()
-        context['recent_publications'] = Publication.objects.filter(
-            is_published=True
-        ).select_related('category').order_by('-created_at')[:4]
+        context['open_access_count'] = published.filter(is_open_access=True).count()
+        context['recent_publications'] = published.select_related('category').order_by('-created_at')[:4]
         return context
 
 
@@ -50,17 +48,27 @@ class CatalogueView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        qs = Publication.objects.filter(is_published=True).select_related('category').prefetch_related('tags')
-        
-        # Text search
+        qs = (
+            Publication.objects
+            .filter(is_published=True)
+            .select_related('category')
+            .prefetch_related('tags')
+            .only(
+                'id', 'title', 'slug', 'author', 'cover_image', 'publication_year',
+                'publication_type', 'is_open_access', 'view_count', 'download_count',
+                'category__name', 'category__slug',
+            )
+        )
+
+        # Text search — title and author first (indexed), abstract as fallback
         q = self.request.GET.get('q', '').strip()
         if q:
             qs = qs.filter(
                 Q(title__icontains=q) |
                 Q(author__icontains=q) |
-                Q(abstract__icontains=q) |
                 Q(keywords__icontains=q) |
-                Q(tags__name__icontains=q)
+                Q(tags__name__icontains=q) |
+                Q(abstract__icontains=q)
             ).distinct()
 
         # Filters

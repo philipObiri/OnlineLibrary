@@ -108,6 +108,9 @@ class Publication(models.Model):
             models.Index(fields=['category']),
             models.Index(fields=['publication_type']),
             models.Index(fields=['is_open_access', 'is_published']),
+            models.Index(fields=['is_published', '-created_at']),
+            models.Index(fields=['is_published', '-view_count']),
+            models.Index(fields=['slug']),
         ]
 
     def __str__(self):

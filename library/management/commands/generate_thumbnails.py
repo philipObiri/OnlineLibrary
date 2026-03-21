@@ -65,10 +65,11 @@ class Command(BaseCommand):
             try:
                 doc = fitz.open(str(pdf_path))
                 page = doc[0]
-                # 1.5x zoom → approx 900×1270 px for a standard A4 PDF
-                mat = fitz.Matrix(1.5, 1.5)
+                # 0.6x zoom → ~360×510 px — sufficient for catalogue cards, fast to load
+                mat = fitz.Matrix(0.6, 0.6)
                 pix = page.get_pixmap(matrix=mat)
-                pix.save(str(cover_path))
+                # Save as JPEG at quality 75 (sharp enough, ~5–15 KB per cover)
+                pix.save(str(cover_path), jpg_quality=75)
                 doc.close()
 
                 pub.cover_image = f'covers/{cover_filename}'

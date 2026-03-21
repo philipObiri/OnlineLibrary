@@ -8,12 +8,8 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-phd-library-dev-key-change-in-prod-!@#$%^&*()')
-# DEBUG = config('DEBUG', default=True, cast=bool)
-DEBUG=True
-ALLOWED_HOSTS = config(
-    'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1,library.ugc.edu.gh,www.library.ugc.edu.gh'
-).split(',')
+DEBUG = config('DEBUG', default=True, cast=bool)
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'library.ugc.edu.gh', 'www.library.ugc.edu.gh']
 
 # Application definition
 INSTALLED_APPS = [
@@ -168,8 +164,13 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'phd-library-cache',
+        'TIMEOUT': 300,  # 5 minutes
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
     }
 }
+CACHE_MIDDLEWARE_SECONDS = 300
 
 # Session
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
