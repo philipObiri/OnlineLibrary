@@ -88,7 +88,7 @@ class Publication(models.Model):
     institution = models.CharField(max_length=255, blank=True)
     language = models.CharField(max_length=50, default='English')
     keywords = models.TextField(blank=True, help_text='Comma-separated keywords')
-    semester = models.CharField(max_length=50, blank=True, help_text='e.g. Year 1, Semester 1')
+    semester = models.CharField(max_length=255, blank=True, help_text='e.g. Year 1, Semester 1')
     
     # Stats
     view_count = models.PositiveIntegerField(default=0)
