@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   ScholarVault — Premium Academic Design System
+   GoldVault — Premium Academic Design System
    Fonts: Playfair Display (serif display) + DM Sans (body)
    Palette: Deep Navy + Antique Gold + White
 ═══════════════════════════════════════════════════════════════ */
@@ -706,7 +706,7 @@ img { max-width: 100%; height: auto; }
 .sv-copy-btn { font-size: 0.75rem; color: var(--navy-700); background: none; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 4px 12px; cursor: pointer; transition: all var(--transition-fast); }
 .sv-copy-btn:hover { background: var(--navy-50); }
 .sv-copy-btn.copied { background: var(--green-50); color: #16A34A; border-color: rgba(22,163,74,0.3); }
-.sv-citation-text { font-size: 0.85rem; font-family: Georgia, serif; background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; line-height: 1.7; color: var(--text-secondary); }
+.sv-citation-text { font-size: 0.85rem; font-family: var(--font-body); background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; line-height: 1.7; color: var(--text-secondary); }
 
 .sv-tags-cloud { display: flex; flex-wrap: wrap; gap: 10px; }
 .sv-cloud-tag { background: var(--slate-100); color: var(--text-secondary); font-size: 0.82rem; padding: 0.4rem 1rem; border-radius: var(--radius-full); border: 1px solid var(--border-color); text-decoration: none; transition: all var(--transition-fast); }

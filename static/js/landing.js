@@ -1,5 +1,5 @@
 /**
- * ScholarVault — Landing Page JavaScript
+ * GoldVault — Landing Page JavaScript
  * Hero autocomplete + Featured carousel
  */
 

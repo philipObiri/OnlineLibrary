@@ -1,5 +1,5 @@
 /**
- * ScholarVault — Publication Detail Page JS
+ * GoldVault — Publication Detail Page JS
  */
 'use strict';
 

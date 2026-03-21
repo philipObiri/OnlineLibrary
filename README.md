@@ -1,4 +1,4 @@
-# ScholarVault — PhD Digital Library Platform
+# GoldVault — PhD Digital Library Platform
 
 A premium academic digital library for PhD students and researchers. Built with Django, DRF, Bootstrap 5, and vanilla JavaScript.
 

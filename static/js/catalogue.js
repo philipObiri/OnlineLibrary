@@ -1,5 +1,5 @@
 /**
- * ScholarVault — Catalogue Page JavaScript
+ * GoldVault — Catalogue Page JavaScript
  * Full AJAX search + multi-filter system with debounce
  */
 

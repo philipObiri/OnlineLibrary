@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static library_extras %}
 
-{% block title %}{{ publication.title }} by {{ publication.author }} — ScholarVault | UGC Library{% endblock %}
+{% block title %}{{ publication.title }} by {{ publication.author }} — GoldVault | UGC Library{% endblock %}
 {% block description %}{{ publication.abstract|truncatechars:155 }}{% endblock %}
 
 {% block og_type %}book{% endblock %}
@@ -10,7 +10,7 @@
 {% block og_image %}{% if publication.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ publication.cover_image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block twitter_card %}summary_large_image{% endblock %}
-{% block twitter_title %}{{ publication.title }} — {{ publication.author }} | ScholarVault{% endblock %}
+{% block twitter_title %}{{ publication.title }} — {{ publication.author }} | GoldVault{% endblock %}
 {% block twitter_description %}{{ publication.abstract|truncatechars:200 }}{% endblock %}
 {% block twitter_image %}{% if publication.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ publication.cover_image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
 

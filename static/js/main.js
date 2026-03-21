@@ -1,5 +1,5 @@
 /**
- * ScholarVault — Main JavaScript
+ * GoldVault — Main JavaScript
  * Handles: Navbar, Search Overlay, Toast Messages, Bookmarks, Tabs
  */
 
