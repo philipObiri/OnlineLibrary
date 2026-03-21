@@ -9,6 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-phd-library-dev-key-change-in-prod-!@#$%^&*()')
 DEBUG = False
+# DEBUG=True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'library.ugc.edu.gh', 'www.library.ugc.edu.gh']
 
 # Application definition
@@ -182,6 +183,7 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
     SECURE_SSL_REDIRECT = True
+    # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000  # 1 year
