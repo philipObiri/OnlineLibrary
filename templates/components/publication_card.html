@@ -8,6 +8,9 @@
     {% if pub.is_open_access %}
     <div class="sv-oa-badge" title="Open Access"><i class="bi bi-unlock-fill"></i></div>
     {% endif %}
+    {% if not pub.file and pub.external_url %}
+    <div class="sv-online-badge" title="Available Online"><i class="bi bi-globe2"></i></div>
+    {% endif %}
     <!-- Quick actions on hover -->
     <div class="sv-pub-hover-actions">
       <a href="{{ pub.get_absolute_url }}" class="sv-pub-action-btn" title="View Details">

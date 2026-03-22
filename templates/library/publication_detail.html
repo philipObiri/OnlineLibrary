@@ -45,12 +45,22 @@
               <i class="bi bi-unlock-fill me-1"></i>Open Access
             </div>
             {% endif %}
+            {% if not publication.file and publication.external_url %}
+            <div class="sv-detail-online-badge">
+              <i class="bi bi-globe2 me-1"></i>Online Resource
+            </div>
+            {% endif %}
           </div>
 
           <!-- Actions -->
           <div class="sv-detail-actions">
             {% if user.is_authenticated %}
-              {% if publication.is_open_access %}
+              {% if not publication.file and publication.external_url %}
+              {# Online-only article — no local PDF, open in external source #}
+              <a href="{{ publication.external_url }}" target="_blank" rel="noopener" class="sv-btn-primary w-100">
+                <i class="bi bi-globe2 me-2"></i>Read Online
+              </a>
+              {% elif publication.is_open_access %}
               <a href="{% url 'download_publication' publication.slug %}" class="sv-btn-primary w-100 sv-btn-download">
                 <i class="bi bi-download me-2"></i>Download PDF
               </a>
@@ -67,14 +77,15 @@
               </button>
             {% else %}
               <a href="{% url 'login' %}?next={{ request.path }}" class="sv-btn-primary w-100">
-                <i class="bi bi-person-fill me-2"></i>Login to Download
+                <i class="bi bi-person-fill me-2"></i>Login to Access
               </a>
               <a href="{% url 'register' %}" class="sv-btn-outline w-100">Create Free Account</a>
             {% endif %}
 
-            {% if publication.external_url %}
+            {% if publication.file and publication.external_url %}
+            {# Has both local file and external link — show external as secondary #}
             <a href="{{ publication.external_url }}" target="_blank" rel="noopener" class="sv-btn-ghost w-100">
-              <i class="bi bi-box-arrow-up-right me-2"></i>View Online
+              <i class="bi bi-box-arrow-up-right me-2"></i>View Online Source
             </a>
             {% endif %}
           </div>

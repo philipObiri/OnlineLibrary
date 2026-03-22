@@ -449,6 +449,12 @@ img { max-width: 100%; height: auto; }
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
 }
+.sv-online-badge {
+  position: absolute; top: 46px; right: 12px;
+  background: rgba(14, 165, 233, 0.9); color: #fff;
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+}
 
 .sv-pub-hover-actions {
   position: absolute; inset: 0;
@@ -652,6 +658,7 @@ img { max-width: 100%; height: auto; }
 .sv-detail-cover { border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.25rem; position: relative; box-shadow: var(--shadow-lg); }
 .sv-detail-cover-img { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; }
 .sv-detail-oa-badge { position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(34,197,94,0.9); color: #fff; text-align: center; font-size: 0.75rem; font-weight: 700; padding: 0.4rem; border-radius: var(--radius-sm); }
+.sv-detail-online-badge { position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(14,165,233,0.9); color: #fff; text-align: center; font-size: 0.75rem; font-weight: 700; padding: 0.4rem; border-radius: var(--radius-sm); }
 
 .sv-detail-actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
 .sv-btn-download { background: linear-gradient(135deg, #16A34A, #15803D); box-shadow: 0 8px 24px rgba(22,163,74,0.3); }
