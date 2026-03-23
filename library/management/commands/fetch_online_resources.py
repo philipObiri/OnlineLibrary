@@ -21,6 +21,7 @@ import time
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from pathlib import Path
 
 import requests
 from django.contrib.auth import get_user_model
@@ -103,6 +104,71 @@ def _get_or_create_category(name: str):
         return None
 
 
+COVER_PALETTE = [
+    (0x1B, 0x3A, 0x6B),  # Deep Navy
+    (0x2D, 0x5F, 0x8A),  # Steel Blue
+    (0xC9, 0xA8, 0x4C),  # Antique Gold
+    (0x2E, 0x7D, 0x32),  # Forest Green
+    (0x6A, 0x1B, 0x9A),  # Purple
+    (0xC6, 0x28, 0x28),  # Crimson
+    (0x00, 0x69, 0x5C),  # Teal
+]
+
+
+def _generate_cover(pub, covers_dir: Path) -> str | None:
+    """
+    Create a styled JPEG placeholder cover for an online article using Pillow.
+    Returns the relative media path ('covers/<slug>.jpg') or None on failure.
+    """
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        return None
+
+    covers_dir.mkdir(parents=True, exist_ok=True)
+    cover_path = covers_dir / f"{pub.slug}.jpg"
+    if cover_path.exists():
+        return f"covers/{pub.slug}.jpg"
+
+    W, H = 300, 420
+    bg = COVER_PALETTE[pub.pk % len(COVER_PALETTE)]
+    img = Image.new("RGB", (W, H), bg)
+    draw = ImageDraw.Draw(img)
+
+    # Subtle inner border
+    draw.rectangle([14, 14, W - 15, H - 15], outline=(255, 255, 255, 30), width=1)
+
+    # Large faint initials
+    words = pub.title.split()
+    initials = (words[0][0] + (words[1][0] if len(words) > 1 else '')).upper()
+    try:
+        font_big = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", 110)
+        font_sm  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 13)
+    except OSError:
+        font_big = ImageFont.load_default()
+        font_sm  = ImageFont.load_default()
+
+    # Draw initials (faint white)
+    bbox = draw.textbbox((0, 0), initials, font=font_big)
+    tw = bbox[2] - bbox[0]
+    draw.text(((W - tw) // 2, 140), initials, font=font_big,
+              fill=(255, 255, 255, 40))
+
+    # Publication type label
+    label = pub.get_publication_type_display().upper()
+    bbox2 = draw.textbbox((0, 0), label, font=font_sm)
+    lw = bbox2[2] - bbox2[0]
+    draw.text(((W - lw) // 2, 340), label, font=font_sm,
+              fill=(255, 255, 255, 140))
+
+    # Thin bottom accent stripe
+    accent = tuple(min(255, c + 40) for c in bg)
+    draw.rectangle([0, H - 6, W, H], fill=accent)
+
+    img.save(str(cover_path), "JPEG", quality=80)
+    return f"covers/{pub.slug}.jpg"
+
+
 def _save_publication(data: dict, dry_run: bool, stdout) -> bool:
     """
     Persist one publication record.
@@ -155,6 +221,14 @@ def _save_publication(data: dict, dry_run: bool, stdout) -> bool:
         uploaded_by=admin,
     )
     pub.save()
+
+    # Generate a Pillow placeholder cover image (online articles have no PDF)
+    from django.conf import settings as django_settings
+    covers_dir = Path(django_settings.MEDIA_ROOT) / 'covers'
+    cover_rel = _generate_cover(pub, covers_dir)
+    if cover_rel:
+        pub.cover_image = cover_rel
+        pub.save(update_fields=['cover_image'])
 
     # Tags: source identifier + category slug
     tags = [data.get("source_tag", "source:unknown")]

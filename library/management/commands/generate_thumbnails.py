@@ -49,7 +49,48 @@ class Command(BaseCommand):
 
         for pub in qs.iterator():
             if not pub.file:
-                skipped += 1
+                # No PDF — generate a styled placeholder cover with Pillow
+                cover_filename = f'{pub.slug}.jpg'
+                cover_path = covers_dir / cover_filename
+                if not cover_path.exists() or options['force']:
+                    try:
+                        from PIL import Image, ImageDraw, ImageFont
+                        PALETTE = [
+                            (0x1B, 0x3A, 0x6B), (0x2D, 0x5F, 0x8A), (0xC9, 0xA8, 0x4C),
+                            (0x2E, 0x7D, 0x32), (0x6A, 0x1B, 0x9A), (0xC6, 0x28, 0x28), (0x00, 0x69, 0x5C),
+                        ]
+                        bg = PALETTE[pub.pk % len(PALETTE)]
+                        W, H = 300, 420
+                        img = Image.new("RGB", (W, H), bg)
+                        draw = ImageDraw.Draw(img)
+                        draw.rectangle([14, 14, W - 15, H - 15], outline=(255, 255, 255), width=1)
+                        words = pub.title.split()
+                        initials = (words[0][0] + (words[1][0] if len(words) > 1 else '')).upper()
+                        try:
+                            font_big = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", 110)
+                            font_sm  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 13)
+                        except OSError:
+                            font_big = ImageFont.load_default()
+                            font_sm  = ImageFont.load_default()
+                        bbox = draw.textbbox((0, 0), initials, font=font_big)
+                        tw = bbox[2] - bbox[0]
+                        draw.text(((W - tw) // 2, 140), initials, font=font_big, fill=(255, 255, 255, 40))
+                        label = pub.get_publication_type_display().upper()
+                        bbox2 = draw.textbbox((0, 0), label, font=font_sm)
+                        lw = bbox2[2] - bbox2[0]
+                        draw.text(((W - lw) // 2, 340), label, font=font_sm, fill=(255, 255, 255, 140))
+                        accent = tuple(min(255, c + 40) for c in bg)
+                        draw.rectangle([0, H - 6, W, H], fill=accent)
+                        img.save(str(cover_path), "JPEG", quality=80)
+                        pub.cover_image = f'covers/{cover_filename}'
+                        pub.save(update_fields=['cover_image'])
+                        success += 1
+                        self.stdout.write(f'   [PLACEHOLDER] {pub.title[:60]}')
+                    except Exception as e:
+                        self.stderr.write(f'   [ERR] Placeholder failed for "{pub.title[:50]}": {e}')
+                        errors += 1
+                else:
+                    skipped += 1
                 continue
 
             # Resolve absolute path of the PDF

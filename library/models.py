@@ -134,11 +134,35 @@ class Publication(models.Model):
     def cover_url(self):
         if self.cover_image:
             return self.cover_image.url
-        # Generate a deterministic placeholder based on category
-        colors = ['1B3A6B', '2D5F8A', 'C9A84C', '2E7D32', '6A1B9A', 'C62828', '00695C']
-        color = colors[self.pk % len(colors)] if self.pk else '1B3A6B'
-        title_short = self.title[:20].replace(' ', '+')
-        return f"https://via.placeholder.com/300x420/{color}/FFFFFF?text={title_short}"
+        return self._placeholder_svg_url()
+
+    def _placeholder_svg_url(self):
+        """Return a self-contained SVG data URL — no external service needed."""
+        import base64
+        from html import escape
+
+        PALETTE = ['1B3A6B', '2D5F8A', 'C9A84C', '2E7D32', '6A1B9A', 'C62828', '00695C']
+        bg = PALETTE[self.pk % len(PALETTE)] if self.pk else PALETTE[0]
+
+        words = self.title.split()
+        initials = (words[0][0] + (words[1][0] if len(words) > 1 else '')).upper()
+        pub_type = escape(self.get_publication_type_display().upper())
+
+        svg = (
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="300" height="420">'
+            f'<rect width="300" height="420" fill="#{bg}"/>'
+            f'<rect x="18" y="18" width="264" height="384" fill="none" '
+            f'stroke="rgba(255,255,255,0.12)" stroke-width="1.5" rx="6"/>'
+            f'<text x="150" y="210" font-family="Georgia,serif" font-size="100" '
+            f'fill="rgba(255,255,255,0.18)" text-anchor="middle" dominant-baseline="middle">'
+            f'{initials}</text>'
+            f'<text x="150" y="340" font-family="Arial,sans-serif" font-size="11" '
+            f'fill="rgba(255,255,255,0.55)" text-anchor="middle" letter-spacing="2">'
+            f'{pub_type}</text>'
+            f'</svg>'
+        )
+        b64 = base64.b64encode(svg.encode('utf-8')).decode()
+        return f'data:image/svg+xml;base64,{b64}'
 
     @property
     def citation_apa(self):
