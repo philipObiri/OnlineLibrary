@@ -90,8 +90,9 @@ class Command(BaseCommand):
                     except OSError:
                         pass
 
-        # Delete the database records
-        deleted_count, _ = qs.delete()
+        # Delete the database records (can't call .delete() after .distinct())
+        ids = list(qs.values_list("pk", flat=True))
+        deleted_count, _ = Publication.objects.filter(pk__in=ids).delete()
 
         self.stdout.write(
             self.style.SUCCESS(
