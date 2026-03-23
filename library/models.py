@@ -40,6 +40,7 @@ class Publication(models.Model):
 
     TYPE_CHOICES = [
         ('book', 'Book'),
+        ('study_manual', 'Study Manual'),
         ('journal', 'Journal Article'),
         ('thesis', 'PhD Thesis'),
         ('dissertation', 'Dissertation'),

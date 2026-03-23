@@ -23,7 +23,7 @@ User = get_user_model()
 
 CATEGORIES = [
     {
-        "name": "Research Methods & Methodology",
+        "name": "Research Methods",
         "icon": "bi-search",
         "color": "#1B3A6B",
         "description": "Quantitative and qualitative research methods, philosophy, and design.",

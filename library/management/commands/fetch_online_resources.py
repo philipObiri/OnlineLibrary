@@ -37,7 +37,7 @@ User = get_user_model()
 # ---------------------------------------------------------------------------
 
 SUBJECT_QUERIES = {
-    "Research Methods & Methodology": [
+    "Research Methods": [
         "research methodology",
         "qualitative research",
         "mixed methods research",
@@ -83,7 +83,7 @@ OPENALEX_EMAIL = "library@ugc.edu.gh"  # polite pool — increases rate limit
 
 # arXiv subject categories relevant to this library's disciplines
 ARXIV_CATEGORIES = {
-    "Research Methods & Methodology":    "stat.ME econ.EM",
+    "Research Methods":                  "stat.ME econ.EM",
     "Business Administration":           "econ.GN q-fin.GN",
     "Finance & Accounting":              "q-fin.GN q-fin.PM q-fin.RM",
     "Human Resource Management":         "econ.GN",
@@ -155,9 +155,10 @@ def _generate_cover(pub, covers_dir: Path) -> str | None:
         return None
 
     covers_dir.mkdir(parents=True, exist_ok=True)
-    cover_path = covers_dir / f"{pub.slug}.jpg"
+    safe_name = pub.slug[:180]  # keep well under Linux's 255-byte filename limit
+    cover_path = covers_dir / f"{safe_name}.jpg"
     if cover_path.exists():
-        return f"covers/{pub.slug}.jpg"
+        return f"covers/{safe_name}.jpg"
 
     W, H = 300, 420
     bg = COVER_PALETTE[pub.pk % len(COVER_PALETTE)]
@@ -298,7 +299,7 @@ def fetch_openalex(query: str, limit: int, category_name: str = "") -> list[dict
     try:
         resp = requests.get(url, params=params, timeout=15)
         resp.raise_for_status()
-    except requests.RequestException as exc:
+    except requests.RequestException:
         return []
 
     results = []
