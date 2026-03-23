@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    GoldVault — Premium Academic Design System
-   Fonts: Playfair Display (serif display) + DM Sans (body)
+   Fonts: Open Sans
    Palette: Deep Navy + Antique Gold + White
 ═══════════════════════════════════════════════════════════════ */
 
@@ -50,8 +50,8 @@
   --border-color: var(--slate-200);
 
   /* Typography */
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-display: 'Open Sans', -apple-system, sans-serif;
+  --font-body: 'Open Sans', -apple-system, sans-serif;
 
   /* Spacing */
   --radius-sm: 8px;
