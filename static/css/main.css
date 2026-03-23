@@ -50,8 +50,8 @@
   --border-color: var(--slate-200);
 
   /* Typography */
-  --font-display: 'Open Sans', -apple-system, sans-serif;
-  --font-body: 'Open Sans', -apple-system, sans-serif;
+  --font-display: 'Montserrat', -apple-system, sans-serif;
+  --font-body: 'Montserrat', -apple-system, sans-serif;
 
   /* Spacing */
   --radius-sm: 8px;

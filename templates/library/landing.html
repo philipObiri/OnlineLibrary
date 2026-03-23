@@ -49,6 +49,7 @@
           <select name="type" class="sv-hero-search-type">
             <option value="">All Types</option>
             <option value="book">Books</option>
+            <option value="study_manual">Study Manuals</option>
             <option value="journal">Journals</option>
             <option value="thesis">Theses</option>
             <option value="conference">Conference Papers</option>
@@ -72,6 +73,9 @@
       {% endfor %}
       <a href="{% url 'catalogue' %}?open_access=1" class="sv-hero-tag sv-hero-tag--oa">
         <i class="bi bi-unlock-fill me-1"></i>Open Access
+      </a>
+      <a href="{% url 'catalogue' %}?type=study_manual" class="sv-hero-tag">
+        <i class="bi bi-journal-bookmark-fill me-1"></i>Study Manuals
       </a>
     </div>
     {% endif %}
@@ -140,6 +144,22 @@
       </div>
       {% endfor %}
       {% endfor %}
+
+      <!-- Study Manuals card -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="{% url 'catalogue' %}?type=study_manual" class="sv-category-card">
+          <div class="sv-category-card-inner" style="--cat-color: #00695C">
+            <div class="sv-category-icon">
+              <i class="bi bi-journal-bookmark-fill"></i>
+            </div>
+            <h3 class="sv-category-name">Study Manuals</h3>
+            <div class="sv-category-count">Self-study materials</div>
+            <div class="sv-category-arrow">
+              <i class="bi bi-arrow-right"></i>
+            </div>
+          </div>
+        </a>
+      </div>
     </div>
 
     <div class="text-center mt-5">
