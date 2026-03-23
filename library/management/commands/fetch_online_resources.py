@@ -81,6 +81,18 @@ SUBJECT_QUERIES = {
 
 OPENALEX_EMAIL = "library@ugc.edu.gh"  # polite pool — increases rate limit
 
+# arXiv subject categories relevant to this library's disciplines
+ARXIV_CATEGORIES = {
+    "Research Methods & Methodology":    "stat.ME econ.EM",
+    "Business Administration":           "econ.GN q-fin.GN",
+    "Finance & Accounting":              "q-fin.GN q-fin.PM q-fin.RM",
+    "Human Resource Management":         "econ.GN",
+    "Marketing Management":              "econ.GN",
+    "Strategic Management & Leadership": "econ.GN",
+    "Corporate Governance":              "econ.GN q-fin.GN",
+    "Academic Writing & Publishing":     "cs.DL",
+}
+
 
 # ---------------------------------------------------------------------------
 # Helper utilities
@@ -89,6 +101,23 @@ OPENALEX_EMAIL = "library@ugc.edu.gh"  # polite pool — increases rate limit
 def _norm_title(title: str) -> str:
     """Normalise a title for duplicate detection."""
     return re.sub(r"[^\w\s]", "", title.lower()).strip()
+
+
+def _is_relevant(title: str, abstract: str, query: str) -> bool:
+    """
+    Return True only if at least one meaningful term from the query
+    appears in the title or abstract. Prevents off-topic results.
+    """
+    haystack = (title + " " + abstract).lower()
+    # Extract individual words from the query, ignore stop-words under 4 chars
+    stop = {"and", "the", "for", "with", "from", "that", "this", "into"}
+    terms = [w for w in re.findall(r"\b[a-z]{4,}\b", query.lower()) if w not in stop]
+    if not terms:
+        return True  # no meaningful terms to check against
+    # At least 2 terms (or all if fewer than 2) must appear
+    matches = sum(1 for t in terms if t in haystack)
+    threshold = min(2, len(terms))
+    return matches >= threshold
 
 
 def _first_admin():
@@ -255,15 +284,16 @@ def _reconstruct_abstract(inverted_index: dict | None) -> str:
     return " ".join(w for _, w in positions)
 
 
-def fetch_openalex(query: str, limit: int) -> list[dict]:
+def fetch_openalex(query: str, limit: int, category_name: str = "") -> list[dict]:
     """Fetch open-access journal articles from OpenAlex."""
     url = "https://api.openalex.org/works"
     params = {
-        "filter": f"is_oa:true,type:journal-article",
-        "search": query,
+        # title_and_abstract.search is much tighter than the general 'search' param
+        "filter": f"is_oa:true,type:journal-article,title_and_abstract.search:{query}",
         "per-page": min(limit, 50),
         "select": "title,authorships,abstract_inverted_index,doi,primary_location,publication_year,biblio",
         "mailto": OPENALEX_EMAIL,
+        "sort": "relevance_score:desc",
     }
     try:
         resp = requests.get(url, params=params, timeout=15)
@@ -287,9 +317,13 @@ def fetch_openalex(query: str, limit: int) -> list[dict]:
 
         abstract = _reconstruct_abstract(item.get("abstract_inverted_index"))
         biblio = item.get("biblio") or {}
+        title = item.get("title", "")
+
+        if not _is_relevant(title, abstract, query):
+            continue
 
         results.append({
-            "title": item.get("title", ""),
+            "title": title,
             "author": first_author,
             "co_authors": co_authors,
             "abstract": abstract or "See full article via the link below.",
@@ -314,9 +348,11 @@ def fetch_openalex(query: str, limit: int) -> list[dict]:
 # DOAJ fetcher
 # ---------------------------------------------------------------------------
 
-def fetch_doaj(query: str, limit: int) -> list[dict]:
+def fetch_doaj(query: str, limit: int, category_name: str = "") -> list[dict]:
     """Fetch articles from the Directory of Open Access Journals."""
-    encoded = urllib.parse.quote(query)
+    # Target title and abstract fields only — prevents off-topic results
+    field_query = f'bibjson.title:"{query}" OR bibjson.abstract:"{query}"'
+    encoded = urllib.parse.quote(field_query)
     url = f"https://doaj.org/api/search/articles/{encoded}"
     params = {"pageSize": min(limit, 50)}
     try:
@@ -355,11 +391,17 @@ def fetch_doaj(query: str, limit: int) -> list[dict]:
         except (TypeError, ValueError):
             year = datetime.now().year
 
+        title = bib.get("title", "")
+        abstract = bib.get("abstract", "")
+
+        if not _is_relevant(title, abstract, query):
+            continue
+
         results.append({
-            "title": bib.get("title", ""),
+            "title": title,
             "author": first_author,
             "co_authors": co_authors,
-            "abstract": bib.get("abstract", "See full article via the link below."),
+            "abstract": abstract or "See full article via the link below.",
             "year": year,
             "doi": doi,
             "journal_name": bib.get("journal", {}).get("title", ""),
@@ -385,12 +427,21 @@ ARXIV_NS = {
 }
 
 
-def fetch_arxiv(query: str, limit: int) -> list[dict]:
+def fetch_arxiv(query: str, limit: int, category_name: str = "") -> list[dict]:
     """Fetch preprints from arXiv."""
-    encoded = urllib.parse.quote(query)
+    # Search title AND abstract only (not full text) for tighter relevance
+    encoded_q = urllib.parse.quote(query)
+    search = f"ti:{encoded_q}+AND+abs:{encoded_q}"
+
+    # Restrict to relevant subject categories for this library
+    cats = ARXIV_CATEGORIES.get(category_name, "econ.GN q-fin.GN stat.ME")
+    cat_filter = "+OR+".join(f"cat:{c}" for c in cats.split())
+    if cat_filter:
+        search = f"({search})+AND+({cat_filter})"
+
     url = (
         f"http://export.arxiv.org/api/query"
-        f"?search_query=all:{encoded}&max_results={min(limit, 50)}&sortBy=relevance"
+        f"?search_query={search}&max_results={min(limit, 50)}&sortBy=relevance"
     )
     try:
         resp = requests.get(url, timeout=20)
@@ -434,6 +485,9 @@ def fetch_arxiv(query: str, limit: int) -> list[dict]:
 
         first_author = authors[0] if authors else "Unknown"
         co_authors = ", ".join(authors[1:6])
+
+        if not _is_relevant(title, abstract, query):
+            continue
 
         results.append({
             "title": title,
@@ -536,7 +590,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"\n  [{source_name}]")
                 for query in queries:
                     self.stdout.write(f"    Query: \"{query}\"")
-                    articles = fetcher(query, limit)
+                    articles = fetcher(query, limit, category_name=cat_name)
                     if not articles:
                         self.stdout.write("      No results or API error.")
                         continue
