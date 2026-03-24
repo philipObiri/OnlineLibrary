@@ -84,6 +84,10 @@ class PublicationViewSet(viewsets.ReadOnlyModelViewSet):
         if open_access == '1':
             queryset = queryset.filter(is_open_access=True)
 
+        online_resources = request.query_params.get('online_resources')
+        if online_resources == '1':
+            queryset = queryset.filter(external_url__gt='')
+
         author = request.query_params.get('author', '').strip()
         if author:
             queryset = queryset.filter(author__icontains=author)

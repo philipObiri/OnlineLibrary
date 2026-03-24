@@ -31,7 +31,7 @@ class LandingView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        published = Publication.objects.filter(is_published=True)
+        published = Publication.objects.filter(is_published=True, external_url='')
         context['featured'] = published.select_related('category').order_by('-view_count', '-created_at')[:6]
         context['categories'] = Category.objects.annotate(
             pub_count=Count('publications', filter=Q(publications__is_published=True))
@@ -95,6 +95,10 @@ class CatalogueView(ListView):
         if open_access == '1':
             qs = qs.filter(is_open_access=True)
 
+        online_resources = self.request.GET.get('online_resources')
+        if online_resources == '1':
+            qs = qs.filter(external_url__gt='')
+
         author = self.request.GET.get('author', '').strip()
         if author:
             qs = qs.filter(author__icontains=author)
@@ -120,6 +124,7 @@ class CatalogueView(ListView):
             'year_from': self.request.GET.get('year_from', ''),
             'year_to': self.request.GET.get('year_to', ''),
             'open_access': self.request.GET.get('open_access', ''),
+            'online_resources': self.request.GET.get('online_resources', ''),
             'author': self.request.GET.get('author', ''),
             'sort': self.request.GET.get('sort', '-created_at'),
         }
